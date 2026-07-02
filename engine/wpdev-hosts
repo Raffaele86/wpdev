@@ -1,0 +1,37 @@
+#!/bin/sh
+# wpdev-hosts — helper privilegiato per /etc/hosts (installato root-owned in /usr/local/sbin).
+# Gestisce SOLO righe "127.0.0.1 <slug>.localhost" dentro il blocco marcato wpdev.
+# Uso: wpdev-hosts add <dominio> | remove <dominio>
+set -eu
+
+ACTION="${1:-}"
+DOMAIN="${2:-}"
+HOSTS=/etc/hosts
+BEGIN="# wpdev-begin (gestito da wpdev — non editare a mano)"
+END="# wpdev-end"
+
+case "$ACTION" in add|remove) ;; *) echo "uso: wpdev-hosts add|remove <slug>.localhost" >&2; exit 2 ;; esac
+
+# Validazione stretta: solo domini .localhost con slug [a-z0-9-]
+echo "$DOMAIN" | grep -Eq '^[a-z0-9][a-z0-9-]{0,62}\.localhost$' || {
+  echo "dominio non valido: $DOMAIN (ammesso solo <slug>.localhost)" >&2; exit 2; }
+
+TMP=$(mktemp /etc/hosts.wpdev.XXXXXX)
+trap 'rm -f "$TMP"' EXIT
+
+# Estrae le righe attuali del blocco (senza marcatori)
+CURRENT=$(sed -n "/^$BEGIN\$/,/^$END\$/p" "$HOSTS" | grep -v '^#' || true)
+
+case "$ACTION" in
+  add)    NEWLINES=$(printf '%s\n127.0.0.1 %s\n' "$CURRENT" "$DOMAIN" | grep -v '^$' | sort -u) ;;
+  remove) NEWLINES=$(printf '%s\n' "$CURRENT" | grep -v " $DOMAIN\$" | grep -v '^$' | sort -u || true) ;;
+esac
+
+# Riscrive il file: tutto tranne il vecchio blocco, poi il blocco nuovo (se non vuoto)
+sed "/^$BEGIN\$/,/^$END\$/d" "$HOSTS" > "$TMP"
+if [ -n "$NEWLINES" ]; then
+  printf '%s\n%s\n%s\n' "$BEGIN" "$NEWLINES" "$END" >> "$TMP"
+fi
+chmod 644 "$TMP"
+cp "$TMP" "$HOSTS"   # cp (non mv): preserva inode/attributi di /etc/hosts
+exit 0

@@ -1,0 +1,10 @@
+[Unit]
+Description=wpdev · Mailpit (SMTP 127.0.0.1:1025, UI http://127.0.0.1:8025)
+
+[Service]
+ExecStart=%h/.local/bin/mailpit --smtp 127.0.0.1:1025 --listen 127.0.0.1:8025 --database %h/.wpdev/mailpit.db
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

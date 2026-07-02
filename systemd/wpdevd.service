@@ -1,0 +1,12 @@
+[Unit]
+Description=wpdev · engine WordPress locale (API 127.0.0.1:9700)
+After=wpdev-caddy.service
+Wants=wpdev-caddy.service wpdev-mailpit.service
+
+[Service]
+ExecStart=/usr/bin/node --no-warnings %h/wpdev/engine/daemon.ts
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target
