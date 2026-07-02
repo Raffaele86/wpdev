@@ -37,14 +37,21 @@ function readBody(req: http.IncomingMessage): Promise<Record<string, unknown>> {
   });
 }
 
+// CORS aperto: l'API ascolta solo su 127.0.0.1 e la GUI Electron fetcha da file://.
+const CORS = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, POST, DELETE, OPTIONS',
+  'access-control-allow-headers': 'content-type',
+};
+
 function sendJson(res: http.ServerResponse, code: number, obj: unknown): void {
-  res.writeHead(code, { 'content-type': 'application/json' });
+  res.writeHead(code, { 'content-type': 'application/json', ...CORS });
   res.end(JSON.stringify(obj, null, 1) + '\n');
 }
 
 // NDJSON: header subito, log in streaming, esito in coda.
 async function streamOp(res: http.ServerResponse, fn: (emit: Emit) => Promise<unknown>): Promise<void> {
-  res.writeHead(200, { 'content-type': 'application/x-ndjson', 'cache-control': 'no-store' });
+  res.writeHead(200, { 'content-type': 'application/x-ndjson', 'cache-control': 'no-store', ...CORS });
   const emit: Emit = (msg) => res.write(JSON.stringify({ event: 'log', msg }) + '\n');
   try {
     const result = await withLock(() => fn(emit));
@@ -59,6 +66,7 @@ async function route(req: http.IncomingMessage, res: http.ServerResponse): Promi
   const parts = url.pathname.split('/').filter(Boolean); // ["api", ...]
   const method = req.method ?? 'GET';
 
+  if (method === 'OPTIONS') { res.writeHead(204, CORS); return res.end(); }
   if (parts[0] !== 'api') return sendJson(res, 404, { error: 'not found' });
 
   // GET /api/health

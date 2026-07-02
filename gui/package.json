@@ -1,0 +1,13 @@
+{
+  "name": "wpdev-gui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GUI desktop di wpdev (client dell'API wpdevd :9700)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron . --no-sandbox"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  }
+}
