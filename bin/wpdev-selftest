@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# wpdev-selftest — suite di accettazione end-to-end.
+# Crea un sito usa-e-getta, verifica HTTP/wp-cli/share/export, lo elimina
+# e controlla che non restino residui. Esce 1 al primo gruppo fallito.
+set -uo pipefail
+
+SLUG="wpdevtest"
+PORT=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync(process.env.HOME+'/.wpdev/config.json','utf8')).httpsPort??8443)}catch{console.log(8443)}")
+WPDEV="${WPDEV_BIN:-$HOME/.local/bin/wpdev}"
+FAIL=0
+PASS_N=0
+
+ok()   { printf '  \033[32mPASS\033[0m %s\n' "$1"; PASS_N=$((PASS_N+1)); }
+ko()   { printf '  \033[31mFAIL\033[0m %s\n' "$1"; FAIL=1; }
+step() { printf '\n\033[1m[%s]\033[0m\n' "$1"; }
+bail() { printf '\nSELFTEST INTERROTTO (cleanup del sito di prova…)\n'; "$WPDEV" delete "$SLUG" --yes >/dev/null 2>&1; exit 1; }
+
+# eventuale residuo da run precedenti
+"$WPDEV" delete "$SLUG" --yes >/dev/null 2>&1 || true
+
+step "1/5 · new $SLUG (blueprint bottega se presente)"
+BP=""
+"$WPDEV" blueprint list 2>/dev/null | grep -q bottega && BP="--blueprint bottega"
+if "$WPDEV" new "$SLUG" $BP --title "Selftest wpdev" > /tmp/wpdev-selftest.log 2>&1; then
+  ok "sito creato"
+else
+  ko "creazione fallita (log: /tmp/wpdev-selftest.log)"; tail -5 /tmp/wpdev-selftest.log; bail
+fi
+
+step "2/5 · HTTP + wp-cli"
+CODE=""
+for i in 1 2 3 4; do
+  CODE=$(curl -sk -o /dev/null -w '%{http_code}' --max-time 15 \
+    --resolve "$SLUG.localhost:$PORT:127.0.0.1" "https://$SLUG.localhost:$PORT/")
+  [ "$CODE" = "200" ] && break
+  sleep 3   # subito dopo il reload Caddy può servire il primo hit in ritardo
+done
+[ "$CODE" = "200" ] && ok "https://$SLUG.localhost:$PORT → 200" || { ko "HTTP $CODE (atteso 200)"; bail; }
+"$WPDEV" cli "$SLUG" -- core is-installed >/dev/null 2>&1 && ok "wp core is-installed" || ko "WP non installato"
+if [ -n "$BP" ]; then
+  "$WPDEV" cli "$SLUG" -- theme list --field=name 2>/dev/null | grep -q '^bottega$' \
+    && ok "tema bottega presente" || ko "tema bottega assente"
+fi
+
+step "3/5 · Live Link (cloudflared + basic auth)"
+SHARE_OUT=$("$WPDEV" share "$SLUG" 2>&1)
+URL=$(echo "$SHARE_OUT" | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' | head -1)
+CRED=$(echo "$SHARE_OUT" | sed -n 's/.*Accesso:  *\([^ ]*\) \/ \(.*\)/\1:\2/p' | head -1)
+if [ -n "$URL" ] && [ -n "$CRED" ]; then
+  # prima aspetta che l'edge del quick tunnel sia raggiungibile, poi verifica gli status
+  AUTH=""
+  for i in 1 2 3 4 5; do
+    sleep 6
+    AUTH=$(curl -4 -s -o /dev/null -w '%{http_code}' --max-time 20 -u "$CRED" "$URL/")
+    [ "$AUTH" = "200" ] && break
+  done
+  NOAUTH=$(curl -4 -s -o /dev/null -w '%{http_code}' --max-time 20 "$URL/")
+  [ "$NOAUTH" = "401" ] && ok "senza auth → 401" || ko "senza auth → $NOAUTH (atteso 401)"
+  [ "$AUTH" = "200" ] && ok "con auth → 200 ($URL)" || ko "con auth → $AUTH (atteso 200)"
+else
+  ko "share non ha restituito URL/credenziali"
+fi
+"$WPDEV" share "$SLUG" --stop >/dev/null 2>&1 && ok "share fermato" || ko "share --stop fallito"
+
+step "4/5 · export (zip + sql)"
+EXP=$("$WPDEV" export "$SLUG" 2>&1 | grep -oE '/[^ ]+\.(zip|sql)' | sort -u)
+ZIP=$(echo "$EXP" | grep -m1 '\.zip$'); SQL=$(echo "$EXP" | grep -m1 '\.sql$')
+[ -s "$ZIP" ] && ok "zip: $(du -h "$ZIP" | cut -f1) $ZIP" || ko "zip mancante"
+[ -s "$SQL" ] && ok "sql: $(du -h "$SQL" | cut -f1) $SQL" || ko "sql mancante"
+rm -f "$ZIP" "$SQL"
+
+step "5/5 · delete senza residui"
+"$WPDEV" delete "$SLUG" --yes >/dev/null 2>&1 && ok "delete eseguito" || ko "delete fallito"
+RES=0
+for f in "$HOME/wpdev-sites/$SLUG" "$HOME/.wpdev/php/$SLUG" "$HOME/.wpdev/run/$SLUG.sock" \
+         "$HOME/.wpdev/caddy/sites/$SLUG.caddy" "$HOME/.wpdev/logs/$SLUG"; do
+  [ -e "$f" ] && { ko "residuo: $f"; RES=1; }
+done
+grep -q "$SLUG.localhost" /etc/hosts && { ko "residuo in /etc/hosts"; RES=1; }
+"$WPDEV" list 2>/dev/null | grep -q "$SLUG" && { ko "residuo nel registry"; RES=1; }
+[ "$RES" = "0" ] && ok "zero residui (webroot, fpm, socket, vhost, log, hosts, registry)"
+
+printf '\n\033[1m== ESITO: %s (%d PASS) ==\033[0m\n' "$([ $FAIL = 0 ] && echo TUTTO OK || echo CI SONO FALLIMENTI)" "$PASS_N"
+exit $FAIL
