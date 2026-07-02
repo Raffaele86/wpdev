@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   SITES_DIR, EXPORTS_DIR, RUN_DIR, LOGS_DIR, ADMINER_DIR,
-  DEFAULT_PHP_VERSION, DEFAULT_LOCALE, SHARE_PORT_BASE,
+  DEFAULT_PHP_VERSION, DEFAULT_LOCALE, SHARE_PORT_BASE, siteUrlFor,
 } from './config.ts';
 import {
   validateSlug, dbIdent, randToken, randHex, runOk, type Emit,
@@ -39,6 +39,7 @@ function buildSite(opts: NewSiteOpts): Site {
     name: opts.title ?? slug,
     slug,
     domain: `${slug}.localhost`,
+    url: siteUrlFor(`${slug}.localhost`),
     path: sitePath,
     webroot: path.join(sitePath, 'app', 'public'),
     phpVersion: opts.php ?? DEFAULT_PHP_VERSION,
@@ -100,7 +101,7 @@ export async function createSite(opts: NewSiteOpts, emit: Emit): Promise<Site> {
     await startSiteInternal(site);
     site.status = 'running';
     upsertSite(site);
-    emit(`sito pronto: https://${site.domain}`);
+    emit(`sito pronto: ${site.url}`);
     return site;
   } catch (err) {
     emit(`ERRORE: ${(err as Error).message}`);
@@ -205,7 +206,7 @@ export async function cloneSite(srcSlug: string, dstSlug: string, emit: Emit): P
 
     dst.status = 'running';
     upsertSite(dst);
-    emit(`clone pronto: https://${dst.domain}`);
+    emit(`clone pronto: ${dst.url}`);
     return dst;
   } catch (err) {
     emit(`ERRORE: ${(err as Error).message}`);
@@ -264,8 +265,8 @@ export async function importSite(opts: ImportOpts, emit: Emit): Promise<Site> {
 
     await startSiteInternal(site);
     if (opts.sql && opts.sourceUrl) {
-      emit(`search-replace ${opts.sourceUrl} → https://${site.domain}`);
-      await searchReplace(site, opts.sourceUrl.replace(/\/$/, ''), `https://${site.domain}`);
+      emit(`search-replace ${opts.sourceUrl} → ${site.url}`);
+      await searchReplace(site, opts.sourceUrl.replace(/\/$/, ''), site.url);
     }
     if (opts.sql) {
       // Garantisce un accesso admin locale noto anche su db importati.
@@ -278,7 +279,7 @@ export async function importSite(opts: ImportOpts, emit: Emit): Promise<Site> {
     }
     site.status = 'running';
     upsertSite(site);
-    emit(`import completato: https://${site.domain}`);
+    emit(`import completato: ${site.url}`);
     return site;
   } catch (err) {
     emit(`ERRORE: ${(err as Error).message}`);
@@ -336,6 +337,7 @@ export interface SiteStatusRow {
   slug: string;
   name: string;
   domain: string;
+  url: string;
   status: string;
   php: string;
   fpm: boolean;
@@ -352,6 +354,7 @@ export async function listSitesStatus(withInstalled: boolean = false): Promise<S
       slug: s.slug,
       name: s.name,
       domain: s.domain,
+      url: s.url ?? siteUrlFor(s.domain),
       status: s.status,
       php: s.phpVersion,
       fpm: fpmRunning(s.slug),
@@ -371,7 +374,7 @@ export async function adminUrl(slug: string): Promise<{ url: string; user: strin
     return { url, user: site.adminUser, pass: site.adminPass };
   } catch {
     // Fallback senza magic login: wp-login classico + credenziali dal registry.
-    return { url: `https://${site.domain}/wp-login.php`, user: site.adminUser, pass: site.adminPass };
+    return { url: `${site.url}/wp-login.php`, user: site.adminUser, pass: site.adminPass };
   }
 }
 
@@ -415,7 +418,7 @@ export function readLogs(slug: string, tail: number = 60): Record<string, string
 // Pool fpm di servizio per Adminer (vhost https://adminer.localhost creato dal setup).
 export function adminerPseudoSite(): Site {
   return {
-    id: 'adminer', name: 'Adminer', slug: 'adminer', domain: 'adminer.localhost',
+    id: 'adminer', name: 'Adminer', slug: 'adminer', domain: 'adminer.localhost', url: siteUrlFor('adminer.localhost'),
     path: ADMINER_DIR, webroot: ADMINER_DIR, phpVersion: DEFAULT_PHP_VERSION,
     db: { name: '', user: '', pass: '' },
     socket: path.join(RUN_DIR, 'adminer.sock'),

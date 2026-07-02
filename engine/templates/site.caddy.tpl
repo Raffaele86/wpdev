@@ -1,5 +1,5 @@
 # wpdev site: {{slug}} (generato — non editare a mano)
-https://{{domain}} {
+https://{{domain}}:{{httpsPort}} {
 	tls internal
 	root * {{webroot}}
 	encode gzip

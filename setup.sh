@@ -62,13 +62,14 @@ cat <<CMDS
   sudo apt-get install -y php8.3-fpm php8.3-mysql php8.3-gd php8.3-mbstring php8.3-xml \\
        php8.3-zip php8.3-intl php8.3-imagick php8.3-xdebug mariadb-server zip unzip
   sudo systemctl disable --now php8.3-fpm        # i pool per-sito li gestisce wpdev
+  # la 3306 è del mysqld di LocalWP lato Windows (rete mirrored): MariaDB su 3307 (WP usa il socket unix)
+  sudo tee /etc/mysql/mariadb.conf.d/99-wpdev.cnf   # [mysqld] port = 3307
   sudo systemctl enable --now mariadb
   sudo mariadb <<'SQL'                            # utente admin dedicato (solo db wp_%)
     CREATE USER IF NOT EXISTS 'wpdev'@'localhost' IDENTIFIED BY '<generata>';
     ALTER USER 'wpdev'@'localhost' IDENTIFIED BY '<generata>';
     GRANT ALL PRIVILEGES ON \`wp\_%\`.* TO 'wpdev'@'localhost' WITH GRANT OPTION;
     GRANT CREATE USER ON *.* TO 'wpdev'@'localhost';
-    FLUSH PRIVILEGES;
   SQL
   sudo setcap 'cap_net_bind_service=+ep' $HOME/.local/bin/caddy   # porte 80/443
   sudo install -o root -g root -m 755 $REPO/engine/wpdev-hosts /usr/local/sbin/wpdev-hosts
@@ -80,13 +81,13 @@ if confirm; then
   sudo apt-get install -y php8.3-fpm php8.3-mysql php8.3-gd php8.3-mbstring php8.3-xml \
     php8.3-zip php8.3-intl php8.3-imagick php8.3-xdebug mariadb-server zip unzip
   sudo systemctl disable --now php8.3-fpm
+  printf '# wpdev: 3306 occupata dal mysqld di Windows/LocalWP (rete mirrored) — WP usa il socket unix\n[mysqld]\nport = 3307\n' | sudo tee /etc/mysql/mariadb.conf.d/99-wpdev.cnf >/dev/null
   sudo systemctl enable --now mariadb
   sudo mariadb <<SQL
 CREATE USER IF NOT EXISTS 'wpdev'@'localhost' IDENTIFIED BY '${DB_ADMIN_PASS}';
 ALTER USER 'wpdev'@'localhost' IDENTIFIED BY '${DB_ADMIN_PASS}';
 GRANT ALL PRIVILEGES ON \`wp\_%\`.* TO 'wpdev'@'localhost' WITH GRANT OPTION;
 GRANT CREATE USER ON *.* TO 'wpdev'@'localhost';
-FLUSH PRIVILEGES;
 SQL
   sudo setcap 'cap_net_bind_service=+ep' "$HOME/.local/bin/caddy"
   sudo install -o root -g root -m 755 "$REPO/engine/wpdev-hosts" /usr/local/sbin/wpdev-hosts
@@ -99,7 +100,7 @@ fi
 
 if [[ ! -f "$STATE/config.json" ]]; then
   umask 077
-  printf '{\n  "dbAdminUser": "wpdev",\n  "dbAdminPass": "%s"\n}\n' "$DB_ADMIN_PASS" > "$STATE/config.json"
+  printf '{\n  "dbAdminUser": "wpdev",\n  "dbAdminPass": "%s",\n  "httpsPort": 8443\n}\n' "$DB_ADMIN_PASS" > "$STATE/config.json"
   note "config.json scritto (credenziali admin MariaDB)"
 fi
 

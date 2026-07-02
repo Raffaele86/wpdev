@@ -32,7 +32,7 @@ export function writeWpConfig(site: Site): void {
 
 export async function installWp(site: Site, title: string): Promise<void> {
   await wp(site, ['core', 'install',
-    `--url=https://${site.domain}`,
+    `--url=${site.url}`,
     `--title=${title}`,
     `--admin_user=${site.adminUser}`,
     `--admin_password=${site.adminPass}`,

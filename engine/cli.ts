@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import readline from 'node:readline';
 import {
-  API_HOST, API_PORT, REPO_DIR, WP_BIN, MAILPIT_UI_PORT,
+  API_HOST, API_PORT, REPO_DIR, WP_BIN, MAILPIT_UI_PORT, siteUrlFor,
 } from './lib/config.ts';
 
 const API = `http://${API_HOST}:${API_PORT}`;
@@ -113,8 +113,8 @@ async function confirm(question: string): Promise<boolean> {
 
 function printSiteSummary(site: any): void {
   console.log('');
-  console.log(`  URL:        https://${site.domain}`);
-  console.log(`  Admin:      https://${site.domain}/wp-admin/  (${site.adminUser} / ${site.adminPass})`);
+  console.log(`  URL:        ${site.url}`);
+  console.log(`  Admin:      ${site.url}/wp-admin/  (${site.adminUser} / ${site.adminPass})`);
   console.log(`  Webroot:    ${site.webroot}`);
   console.log(`  DB:         ${site.db.name} (utente ${site.db.user})`);
   console.log(`  PHP:        ${site.phpVersion}`);
@@ -127,7 +127,7 @@ async function cmdList(): Promise<void> {
     SITO: s.slug,
     STATO: s.status === 'running' ? (s.fpm ? 'running' : 'errore(fpm giù)') : 'stopped',
     PHP: s.php,
-    URL: `https://${s.domain}`,
+    URL: s.url,
     'LIVE LINK': s.shareUrl ?? '-',
   }));
   console.table(rows);
@@ -252,7 +252,7 @@ async function main(): Promise<void> {
     case 'open': {
       const slug = pos[0] ?? die('uso: wpdev open <slug>');
       const { site } = await apiJson('GET', `/api/sites/${slug}`);
-      console.log(`https://${site.domain}`);
+      console.log(site.url);
       break;
     }
     case 'admin': {
@@ -265,7 +265,7 @@ async function main(): Promise<void> {
     case 'db': {
       const slug = pos[0] ?? die('uso: wpdev db <slug>');
       const { site } = await apiJson('GET', `/api/sites/${slug}`);
-      console.log(`Adminer:  https://adminer.localhost/?server=localhost&username=${site.db.user}&db=${site.db.name}`);
+      console.log(`Adminer:  ${siteUrlFor('adminer.localhost')}/?server=localhost&username=${site.db.user}&db=${site.db.name}`);
       console.log(`Password: ${site.db.pass}`);
       break;
     }

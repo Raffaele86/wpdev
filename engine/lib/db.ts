@@ -21,16 +21,14 @@ export async function createSiteDb(db: SiteDb): Promise<void> {
   await sqlAdmin(
     `CREATE DATABASE IF NOT EXISTS \`${db.name}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\n` +
     `CREATE USER IF NOT EXISTS '${db.user}'@'localhost' IDENTIFIED BY '${db.pass}';\n` +
-    `GRANT ALL PRIVILEGES ON \`${db.name.replace(/_/g, '\\_')}\`.* TO '${db.user}'@'localhost';\n` +
-    `FLUSH PRIVILEGES;`
+    `GRANT ALL PRIVILEGES ON \`${db.name.replace(/_/g, '\\_')}\`.* TO '${db.user}'@'localhost';`
   );
 }
 
 export async function dropSiteDb(db: SiteDb): Promise<void> {
   await sqlAdmin(
     `DROP DATABASE IF EXISTS \`${db.name}\`;\n` +
-    `DROP USER IF EXISTS '${db.user}'@'localhost';\n` +
-    `FLUSH PRIVILEGES;`
+    `DROP USER IF EXISTS '${db.user}'@'localhost';`
   );
 }
 

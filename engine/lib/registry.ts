@@ -12,6 +12,7 @@ export interface Site {
   name: string;
   slug: string;
   domain: string;
+  url: string;       // https://<slug>.localhost[:porta]
   path: string;      // ~/wpdev-sites/<slug>
   webroot: string;   // <path>/app/public
   phpVersion: string;

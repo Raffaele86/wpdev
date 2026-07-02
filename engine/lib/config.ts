@@ -24,6 +24,20 @@ export const ADMINER_DIR = path.join(STATE_DIR, 'adminer');
 
 export const API_HOST = '127.0.0.1';
 export const API_PORT = 9700;
+// 443 è occupata dal router httpd di LocalWP lato Windows (rete mirrored):
+// wpdev usa una porta HTTPS dedicata. Configurabile con "httpsPort" in config.json
+// (metti 443 quando LocalWP non serve più).
+export const HTTPS_PORT: number = (() => {
+  try {
+    const cfg = JSON.parse(fs.readFileSync(path.join(os.homedir(), '.wpdev', 'config.json'), 'utf8'));
+    if (Number.isInteger(cfg.httpsPort)) return cfg.httpsPort;
+  } catch { /* config assente: default */ }
+  return 8443;
+})();
+
+export function siteUrlFor(domain: string): string {
+  return HTTPS_PORT === 443 ? `https://${domain}` : `https://${domain}:${HTTPS_PORT}`;
+}
 export const CADDY_ADMIN = '127.0.0.1:2020';
 export const MAILPIT_SMTP = '127.0.0.1:1025';
 export const MAILPIT_UI_PORT = 8025;

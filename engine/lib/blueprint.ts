@@ -55,8 +55,8 @@ export async function applyBlueprint(site: Site, name: string, emit: Emit): Prom
     const { importDb } = await import('./db.ts');
     await importDb(site.db, path.join(dir, bp.seedSql));
     if (bp.baseUrl) {
-      emit(`blueprint: search-replace ${bp.baseUrl} → https://${site.domain}`);
-      await searchReplace(site, bp.baseUrl, `https://${site.domain}`);
+      emit(`blueprint: search-replace ${bp.baseUrl} → ${site.url}`);
+      await searchReplace(site, bp.baseUrl, site.url);
     }
     // Il seed sovrascrive gli utenti: ripristina l'admin del sito.
     const { ADMIN_EMAIL } = await import('./config.ts');
@@ -111,7 +111,7 @@ export async function saveBlueprint(site: Site, name: string, emit: Emit): Promi
     plugins,
     activate: activeRes.stdout.trim().split('\n')[0] || null,
     seedSql: 'seed.sql',
-    baseUrl: `https://${site.domain}`,
+    baseUrl: site.url,
   };
   writeJsonAtomic(path.join(dir, 'manifest.json'), manifest);
   return manifest;

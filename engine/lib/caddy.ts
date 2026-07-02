@@ -2,7 +2,7 @@
 // (~/.config/caddy/Caddyfile, :8189). Vhost per sito = frammento in caddy/sites/.
 import fs from 'node:fs';
 import path from 'node:path';
-import { CADDY_BIN, CADDY_DIR, CADDY_SITES_DIR, CADDYFILE, CADDY_ADMIN, TEMPLATES_DIR, LOGS_DIR } from './config.ts';
+import { CADDY_BIN, CADDY_DIR, CADDY_SITES_DIR, CADDYFILE, CADDY_ADMIN, TEMPLATES_DIR, LOGS_DIR, HTTPS_PORT } from './config.ts';
 import { renderTemplate, runOk } from './util.ts';
 import type { Site } from './registry.ts';
 
@@ -24,6 +24,7 @@ export function writeSiteVhost(site: Site): void {
   const frag = renderTemplate(path.join(TEMPLATES_DIR, 'site.caddy.tpl'), {
     slug: site.slug,
     domain: site.domain,
+    httpsPort: String(HTTPS_PORT),
     webroot: site.webroot,
     socket: site.socket,
     accessLog: path.join(LOGS_DIR, site.slug, 'caddy-access.log'),
@@ -77,7 +78,11 @@ export async function reloadCaddy(): Promise<void> {
 
 export async function caddyRunning(): Promise<boolean> {
   try {
-    const res = await fetch(`http://${CADDY_ADMIN}/config/`, { signal: AbortSignal.timeout(2000) });
+    // undici manda un Origin vuoto e l'admin Caddy risponde 403: serve un Origin esplicito.
+    const res = await fetch(`http://${CADDY_ADMIN}/config/`, {
+      signal: AbortSignal.timeout(2000),
+      headers: { origin: `http://${CADDY_ADMIN}` },
+    });
     return res.ok;
   } catch { return false; }
 }

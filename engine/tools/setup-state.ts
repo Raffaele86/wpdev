@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import {
-  ensureStateDirs, ADMINER_DIR, RUN_DIR, CADDY_SITES_DIR, TEMPLATES_DIR, BLUEPRINTS_DIR,
+  ensureStateDirs, ADMINER_DIR, RUN_DIR, CADDY_SITES_DIR, TEMPLATES_DIR, BLUEPRINTS_DIR, HTTPS_PORT,
 } from '../lib/config.ts';
 import { ensureMainCaddyfile } from '../lib/caddy.ts';
 import { renderTemplate, writeJsonAtomic } from '../lib/util.ts';
@@ -18,6 +18,7 @@ console.log('stato ~/.wpdev inizializzato');
 const adminerFrag = renderTemplate(path.join(TEMPLATES_DIR, 'adminer.caddy.tpl'), {
   adminerDir: ADMINER_DIR,
   adminerSocket: path.join(RUN_DIR, 'adminer.sock'),
+  httpsPort: String(HTTPS_PORT),
 });
 fs.writeFileSync(path.join(CADDY_SITES_DIR, 'adminer.caddy'), adminerFrag);
 console.log('vhost adminer.localhost scritto');
