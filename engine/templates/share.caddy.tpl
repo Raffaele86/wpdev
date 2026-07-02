@@ -1,5 +1,7 @@
 # wpdev share: {{slug}} (Live Link — generato, non editare a mano)
-http://127.0.0.1:{{sharePort}} {
+# host-agnostico: cloudflared inoltra con l'Host trycloudflare originale
+http://:{{sharePort}} {
+	bind 127.0.0.1
 	basic_auth {
 		{{authUser}} {{authHash}}
 	}

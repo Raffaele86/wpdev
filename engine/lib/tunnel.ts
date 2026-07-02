@@ -3,7 +3,7 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { CLOUDFLARED_BIN, LOGS_DIR } from './config.ts';
+import { CLOUDFLARED_BIN, LOGS_DIR, STATE_DIR } from './config.ts';
 import { pidAlive } from './util.ts';
 
 const children = new Map<string, ChildProcess>();
@@ -12,7 +12,11 @@ export async function startQuickTunnel(slug: string, localUrl: string): Promise<
   const logDir = path.join(LOGS_DIR, slug);
   fs.mkdirSync(logDir, { recursive: true });
   const logFile = path.join(logDir, 'cloudflared.log');
-  const child = spawn(CLOUDFLARED_BIN, ['tunnel', '--url', localUrl, '--no-autoupdate'], {
+  // --config vuota OBBLIGATORIA: il legacy ~/.cloudflared/config.yml dirotta
+  // l'ingress del quick tunnel (catch-all 404 su qualunque hostname trycloudflare).
+  const emptyConfig = path.join(STATE_DIR, 'cloudflared-empty.yml');
+  if (!fs.existsSync(emptyConfig)) fs.writeFileSync(emptyConfig, '');
+  const child = spawn(CLOUDFLARED_BIN, ['tunnel', '--config', emptyConfig, '--url', localUrl, '--no-autoupdate'], {
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   children.set(slug, child);

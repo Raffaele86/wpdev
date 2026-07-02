@@ -1,8 +1,12 @@
 <?php
 /** wpdev wp-config — generato, non editare a mano (rigenerato da wpdev) */
 
-// Dietro il Live Link (cloudflared) il TLS termina all'edge: rispetta X-Forwarded-Proto.
+// Dietro il Live Link (cloudflared) il TLS termina all'edge:
+// rispetta X-Forwarded-Proto e Cf-Visitor (quick tunnel manda solo quest'ultimo).
 if ( ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && 'https' === $_SERVER['HTTP_X_FORWARDED_PROTO'] ) {
+	$_SERVER['HTTPS'] = 'on';
+}
+if ( isset( $_SERVER['HTTP_CF_VISITOR'] ) && false !== strpos( $_SERVER['HTTP_CF_VISITOR'], 'https' ) ) {
 	$_SERVER['HTTPS'] = 'on';
 }
 

@@ -23,6 +23,13 @@ const adminerFrag = renderTemplate(path.join(TEMPLATES_DIR, 'adminer.caddy.tpl')
 fs.writeFileSync(path.join(CADDY_SITES_DIR, 'adminer.caddy'), adminerFrag);
 console.log('vhost adminer.localhost scritto');
 
+// adminer.localhost in /etc/hosts (se l'helper privilegiato è già installato)
+const { addHost, helperInstalled, hostInEtcHosts } = await import('../lib/hosts.ts');
+if (helperInstalled() && !hostInEtcHosts('adminer.localhost')) {
+  try { await addHost('adminer.localhost'); console.log('adminer.localhost registrato in /etc/hosts'); }
+  catch (err) { console.log(`avviso: hosts adminer non registrato — ${(err as Error).message}`); }
+}
+
 // Blueprint bottega dal tema in ~/bottega-theme (parent + child sample, senza node_modules)
 const bottegaSrc = path.join(os.homedir(), 'bottega-theme');
 const bpDir = path.join(BLUEPRINTS_DIR, 'bottega');
