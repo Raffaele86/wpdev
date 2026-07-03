@@ -31,7 +31,7 @@ wpdev selftest             # suite di accettazione end-to-end (crea/verifica/eli
 | `wpdev db <slug>` | URL Adminer + credenziali |
 | `wpdev share <slug> [--auth u:p]` / `--stop` | Live Link pubblico (trycloudflare + basic auth) |
 | `wpdev clone <src> <dst>` | clona sito + db con search-replace |
-| `wpdev export <slug>` | zip webroot + dump .sql in `~/wpdev-exports/` |
+| `wpdev export <slug>` | zip webroot + dump .sql in `D:\NAS\WPDev\exports` (`exportsDir` in config.json) |
 | `wpdev import <zip> <slug> [--sql f] [--source-url u]` | importa da zip (formato export) |
 | `wpdev import --from-remote u@host:/path <slug>` | importa da server via ssh (webroot + `wp db export` remoto) |
 | `wpdev blueprint list` / `blueprint save <slug> <nome>` | gestione blueprint |
@@ -50,8 +50,13 @@ Operazioni lunghe → risposta NDJSON in streaming (`{"event":"log"|"done"|"erro
 ~/wpdev/                 questo repo (engine TS su node 24, gui Electron, setup, selftest)
 ~/.wpdev/                stato: sites.json, config.json, caddy/, php/, run/, logs/, blueprints/
 ~/wpdev-sites/<slug>/app/public    webroot (layout speculare a Local)
-~/wpdev-exports/         export zip+sql (mai dentro un webroot)
+/mnt/d/NAS/WPDev/exports           export zip+sql ("exportsDir" in config.json — mai dentro un webroot)
+/mnt/d/NAS/WPDev/backup            backup giornaliero 12:30 (~/bin/backup-wpdev.sh, keep 14)
 ```
+
+Da Windows: repo e siti in `\\wsl.localhost\Ubuntu\home\raffa\…`; GUI col doppio click su
+`D:\NAS\WPDev\wpdev-gui.bat`. Engine e siti NON possono stare su `D:` (drvfs/9p: niente
+socket unix, locking fragile — stesso problema dello scheduler SQLITE_BUSY).
 
 ## Gotcha noti (macchina di Raffaele)
 

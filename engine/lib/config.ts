@@ -9,7 +9,15 @@ export const TEMPLATES_DIR = path.join(REPO_DIR, 'engine', 'templates');
 
 export const STATE_DIR = path.join(HOME, '.wpdev');
 export const SITES_DIR = path.join(HOME, 'wpdev-sites');
-export const EXPORTS_DIR = path.join(HOME, 'wpdev-exports');
+// Gli export sono file semplici: possono stare su drvfs (D:) per la visibilità da Windows.
+// Configurabile con "exportsDir" in config.json; engine e siti restano su ext4 (socket unix).
+export const EXPORTS_DIR: string = (() => {
+  try {
+    const cfg = JSON.parse(fs.readFileSync(path.join(os.homedir(), '.wpdev', 'config.json'), 'utf8'));
+    if (typeof cfg.exportsDir === 'string' && cfg.exportsDir) return cfg.exportsDir;
+  } catch { /* config assente: default */ }
+  return path.join(HOME, 'wpdev-exports');
+})();
 
 export const REGISTRY_FILE = path.join(STATE_DIR, 'sites.json');
 export const CONFIG_FILE = path.join(STATE_DIR, 'config.json');
