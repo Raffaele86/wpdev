@@ -198,7 +198,7 @@ export async function cloneSite(srcSlug: string, dstSlug: string, emit: Emit): P
     fs.unlinkSync(tmpSql);
 
     emit('riscrivo wp-config.php (nuove credenziali db)');
-    writeWpConfig(dst);
+    writeWpConfig(dst, detectTablePrefix(src.webroot));
 
     emit(`search-replace //${src.domain} → //${dst.domain}`);
     await startSiteInternal(dst); // fpm su prima del search-replace non serve, ma il vhost sì per verifiche
@@ -233,25 +233,41 @@ export async function exportSite(slug: string, emit: Emit): Promise<{ zip: strin
 
 export interface ImportOpts {
   slug: string;
-  zip: string;        // zip del webroot (formato wpdev export)
+  zip: string;        // zip del webroot (formato wpdev export) OPPURE directory webroot
   sql?: string;       // dump .sql opzionale
-  sourceUrl?: string; // URL d'origine per il search-replace (es. https://www.example.com)
+  sourceUrl?: string; // URL d'origine per il search-replace (auto-rilevato dal db se omesso)
   title?: string;
   php?: string;
+}
+
+// Legge $table_prefix dal wp-config d'origine (i siti Local possono averlo custom).
+function detectTablePrefix(webroot: string): string {
+  try {
+    const conf = fs.readFileSync(path.join(webroot, 'wp-config.php'), 'utf8');
+    const m = conf.match(/\$table_prefix\s*=\s*['"]([A-Za-z0-9_]+)['"]/);
+    if (m) return m[1];
+  } catch { /* wp-config assente: default */ }
+  return 'wp_';
 }
 
 export async function importSite(opts: ImportOpts, emit: Emit): Promise<Site> {
   validateSlug(opts.slug);
   if (siteExists(opts.slug)) throw new Error(`il sito "${opts.slug}" esiste già`);
-  if (!fs.existsSync(opts.zip)) throw new Error(`zip non trovato: ${opts.zip}`);
+  if (!fs.existsSync(opts.zip)) throw new Error(`zip/directory non trovata: ${opts.zip}`);
   if (opts.sql && !fs.existsSync(opts.sql)) throw new Error(`sql non trovato: ${opts.sql}`);
 
   const site = buildSite({ slug: opts.slug, title: opts.title ?? opts.slug, php: opts.php });
   try {
-    emit(`estraggo ${opts.zip} → ${site.webroot}`);
     fs.mkdirSync(site.webroot, { recursive: true });
     fs.mkdirSync(path.join(LOGS_DIR, site.slug), { recursive: true });
-    await runOk('unzip', ['-qo', opts.zip, '-d', site.webroot], { timeoutMs: 600_000 });
+    if (fs.statSync(opts.zip).isDirectory()) {
+      emit(`copio ${opts.zip} → ${site.webroot} (rsync)`);
+      await runOk('rsync', ['-a', opts.zip.replace(/\/$/, '') + '/', site.webroot + '/'],
+        { timeoutMs: 3_600_000 });
+    } else {
+      emit(`estraggo ${opts.zip} → ${site.webroot}`);
+      await runOk('unzip', ['-qo', opts.zip, '-d', site.webroot], { timeoutMs: 600_000 });
+    }
 
     await addHost(site.domain);
     emit(`creo database ${site.db.name}`);
@@ -260,13 +276,22 @@ export async function importSite(opts: ImportOpts, emit: Emit): Promise<Site> {
       emit('importo il dump sql');
       await importDb(site.db, opts.sql);
     }
+    const tablePrefix = detectTablePrefix(site.webroot);
+    if (tablePrefix !== 'wp_') emit(`prefisso tabelle rilevato: ${tablePrefix}`);
     emit('riscrivo wp-config.php (credenziali locali)');
-    writeWpConfig(site);
+    writeWpConfig(site, tablePrefix);
 
+    // URL d'origine: quello passato, altrimenti auto-rilevato dal db importato.
+    let sourceUrl = opts.sourceUrl?.replace(/\/$/, '');
+    if (opts.sql && !sourceUrl) {
+      const cur = await wpTry(site, ['option', 'get', 'siteurl']);
+      const val = cur.stdout.trim();
+      if (cur.code === 0 && val.startsWith('http')) sourceUrl = val.replace(/\/$/, '');
+    }
     await startSiteInternal(site);
-    if (opts.sql && opts.sourceUrl) {
-      emit(`search-replace ${opts.sourceUrl} → ${site.url}`);
-      await searchReplace(site, opts.sourceUrl.replace(/\/$/, ''), site.url);
+    if (opts.sql && sourceUrl && sourceUrl !== site.url) {
+      emit(`search-replace ${sourceUrl} → ${site.url}`);
+      await searchReplace(site, sourceUrl, site.url);
     }
     if (opts.sql) {
       // Garantisce un accesso admin locale noto anche su db importati.

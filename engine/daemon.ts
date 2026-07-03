@@ -50,14 +50,28 @@ function sendJson(res: http.ServerResponse, code: number, obj: unknown): void {
 }
 
 // NDJSON: header subito, log in streaming, esito in coda.
+// Il client può sparire a metà (timeout, ctrl-c): l'operazione DEVE continuare
+// e completare (o fare rollback) lato server — mai crashare su EPIPE.
 async function streamOp(res: http.ServerResponse, fn: (emit: Emit) => Promise<unknown>): Promise<void> {
+  res.on('error', () => { /* client disconnesso */ });
   res.writeHead(200, { 'content-type': 'application/x-ndjson', 'cache-control': 'no-store', ...CORS });
-  const emit: Emit = (msg) => res.write(JSON.stringify({ event: 'log', msg }) + '\n');
+  const safeWrite = (line: string) => {
+    if (res.destroyed || res.writableEnded) return;
+    try { res.write(line); } catch { /* client disconnesso */ }
+  };
+  const emit: Emit = (msg) => safeWrite(JSON.stringify({ event: 'log', msg }) + '\n');
+  // keepalive: i passi lunghi e muti (import db grossi) superano il bodyTimeout
+  // di 5 min del fetch di node — un ping ogni 15s tiene vivo lo stream.
+  const ping = setInterval(() => safeWrite(JSON.stringify({ event: 'ping' }) + '\n'), 15_000);
   try {
     const result = await withLock(() => fn(emit));
-    res.end(JSON.stringify({ event: 'done', result: result ?? null }) + '\n');
+    clearInterval(ping);
+    safeWrite(JSON.stringify({ event: 'done', result: result ?? null }) + '\n');
   } catch (err) {
-    res.end(JSON.stringify({ event: 'error', message: (err as Error).message }) + '\n');
+    clearInterval(ping);
+    safeWrite(JSON.stringify({ event: 'error', message: (err as Error).message }) + '\n');
+  } finally {
+    if (!res.destroyed && !res.writableEnded) res.end();
   }
 }
 
@@ -160,11 +174,19 @@ async function main(): Promise<void> {
   await reconcile((msg) => console.log(`[reconcile] ${msg}`));
 
   const server = http.createServer((req, res) => {
+    req.on('error', () => { /* client disconnesso */ });
+    req.socket.on('error', () => { /* EPIPE: mai abbattere il daemon */ });
     route(req, res).catch((err) => {
       if (!res.headersSent) sendJson(res, 500, { error: (err as Error).message });
-      else res.end(JSON.stringify({ event: 'error', message: (err as Error).message }) + '\n');
+      else if (!res.destroyed && !res.writableEnded) {
+        res.end(JSON.stringify({ event: 'error', message: (err as Error).message }) + '\n');
+      }
     });
   });
+  // Ogni socket (incluse le keep-alive senza request attiva) può dare EPIPE se il
+  // client muore di colpo: senza handler l'evento 'error' abbatte il processo.
+  server.on('connection', (socket) => socket.on('error', () => { /* client sparito */ }));
+  server.on('clientError', (_err, socket) => { try { socket.destroy(); } catch { /* già chiusa */ } });
   server.listen(API_PORT, API_HOST, () => {
     console.log(`wpdevd ${VERSION} in ascolto su http://${API_HOST}:${API_PORT} (siti registrati: ${loadRegistry().sites.length})`);
   });

@@ -306,6 +306,7 @@ async function main(): Promise<void> {
           slug, zip: path.resolve(zip),
           sql: flags.sql ? path.resolve(String(flags.sql)) : undefined,
           sourceUrl: flags['source-url'] ? String(flags['source-url']) : undefined,
+          title: flags.title ? String(flags.title) : undefined,
         });
         printSiteSummary(site);
       }

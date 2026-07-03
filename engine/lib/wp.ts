@@ -18,11 +18,12 @@ export async function downloadCore(site: Site, locale: string = DEFAULT_LOCALE):
   await wp(site, ['core', 'download', `--locale=${locale}`, '--skip-content=false'], { timeoutMs: 600_000 });
 }
 
-export function writeWpConfig(site: Site): void {
+export function writeWpConfig(site: Site, tablePrefix: string = 'wp_'): void {
   const vars: Record<string, string> = {
     dbName: site.db.name,
     dbUser: site.db.user,
     dbPass: site.db.pass,
+    tablePrefix,
     wpDebugLog: path.join(LOGS_DIR, site.slug, 'wp-debug.log'),
   };
   for (let i = 1; i <= 8; i++) vars[`salt${i}`] = randToken(64);

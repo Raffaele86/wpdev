@@ -32,8 +32,13 @@ export function run(cmd: string, args: string[], opts: RunOpts = {}): Promise<Ru
       if (timer) clearTimeout(timer);
       resolve({ code: code ?? -1, stdout, stderr });
     });
-    if (opts.input !== undefined) child.stdin.write(opts.input);
-    child.stdin.end();
+    // Se il figlio muore mentre gli scriviamo input grossi (es. dump sql),
+    // lo stdin dà EPIPE: senza handler abbatterebbe l'intero processo.
+    child.stdin.on('error', () => { /* il close riporterà l'exit code vero */ });
+    try {
+      if (opts.input !== undefined) child.stdin.write(opts.input);
+      child.stdin.end();
+    } catch { /* figlio già morto: gestito da close */ }
   });
 }
 

@@ -18,9 +18,11 @@ async function sqlAdmin(sql: string): Promise<string> {
 
 export async function createSiteDb(db: SiteDb): Promise<void> {
   // I nomi derivano da uno slug già validato ([a-z0-9_]) — interpolazione sicura.
+  // ALTER USER allinea la password anche se l'utente sopravvive a un rollback interrotto.
   await sqlAdmin(
     `CREATE DATABASE IF NOT EXISTS \`${db.name}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\n` +
     `CREATE USER IF NOT EXISTS '${db.user}'@'localhost' IDENTIFIED BY '${db.pass}';\n` +
+    `ALTER USER '${db.user}'@'localhost' IDENTIFIED BY '${db.pass}';\n` +
     `GRANT ALL PRIVILEGES ON \`${db.name.replace(/_/g, '\\_')}\`.* TO '${db.user}'@'localhost';`
   );
 }
@@ -57,10 +59,23 @@ export async function dumpDb(db: SiteDb, outFile: string): Promise<void> {
 }
 
 export async function importDb(db: SiteDb, sqlFile: string): Promise<void> {
+  // Stream di byte grezzi: leggere il dump come stringa utf8 corrompe i blob
+  // binari (mysqldump emette _binary '…') e mariadb muore a metà import.
+  const { spawn } = await import('node:child_process');
   const fs = await import('node:fs');
-  const sql = fs.readFileSync(sqlFile, 'utf8');
-  await runOk(MARIADB, ['-u', db.user, `-p${db.pass}`, '-h', 'localhost',
-    '--default-character-set=utf8mb4', db.name], { input: sql });
+  await new Promise<void>((resolve, reject) => {
+    const child = spawn(MARIADB, ['-u', db.user, `-p${db.pass}`, '-h', 'localhost',
+      '--default-character-set=utf8mb4', db.name]);
+    let stderr = '';
+    child.stderr.on('data', (d) => { stderr += d; });
+    child.stdin.on('error', () => { /* exit code al close */ });
+    child.on('error', reject);
+    child.on('close', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`import sql fallito (${code}): ${stderr.trim().slice(-400)}`));
+    });
+    fs.createReadStream(sqlFile).pipe(child.stdin);
+  });
 }
 
 export async function checkAdminAccess(): Promise<boolean> {

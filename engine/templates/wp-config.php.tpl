@@ -33,7 +33,7 @@ define( 'SECURE_AUTH_SALT', '{{salt6}}' );
 define( 'LOGGED_IN_SALT',   '{{salt7}}' );
 define( 'NONCE_SALT',       '{{salt8}}' );
 
-$table_prefix = 'wp_';
+$table_prefix = '{{tablePrefix}}';
 
 define( 'WP_ENVIRONMENT_TYPE', 'local' );
 define( 'WP_DEBUG', true );
