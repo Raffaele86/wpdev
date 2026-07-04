@@ -24,7 +24,7 @@ app.whenReady().then(() => {
     minWidth: 900,
     minHeight: 600,
     title: 'wpdev',
-    backgroundColor: '#16161d',
+    backgroundColor: '#17140f',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -32,9 +32,12 @@ app.whenReady().then(() => {
     },
   });
   win.setMenuBarVisibility(false);
-  // WPDEV_SELECT=<slug> pre-seleziona un sito (usato dalle verifiche automatiche)
-  win.loadFile('index.html', process.env.WPDEV_SELECT
-    ? { query: { select: process.env.WPDEV_SELECT } } : undefined);
+  // Hook di test headless: WPDEV_SELECT=<slug> pre-seleziona un sito,
+  // WPDEV_OPEN=new apre il dialog "nuovo sito".
+  const query = {};
+  if (process.env.WPDEV_SELECT) query.select = process.env.WPDEV_SELECT;
+  if (process.env.WPDEV_OPEN) query.open = process.env.WPDEV_OPEN;
+  win.loadFile('index.html', Object.keys(query).length ? { query } : undefined);
 
   // Verifica headless: WPDEV_SHOT=<file.png> cattura la finestra dopo 4s ed esce.
   const shot = process.env.WPDEV_SHOT;
