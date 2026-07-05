@@ -343,6 +343,9 @@ async function refresh() {
 
 // ----------------------------------------------------------- azioni globali ---
 $('#mailpitBtn').onclick = () => open('http://127.0.0.1:8025');
+$('#winMin').onclick = () => window.wpdev.win('min');
+$('#winMax').onclick = () => window.wpdev.win('max');
+$('#winClose').onclick = () => window.wpdev.win('close');
 
 $('#newBtn').onclick = async () => {
   const dlg = $('#newDialog');

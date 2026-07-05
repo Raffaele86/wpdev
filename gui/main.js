@@ -16,6 +16,13 @@ function openInWindowsBrowser(url) {
 
 ipcMain.handle('open-url', (_e, url) => openInWindowsBrowser(url));
 ipcMain.handle('copy', (_e, text) => clipboard.writeText(String(text)));
+ipcMain.handle('win', (e, action) => {
+  const win = BrowserWindow.fromWebContents(e.sender);
+  if (!win) return;
+  if (action === 'min') win.minimize();
+  else if (action === 'max') win.isMaximized() ? win.unmaximize() : win.maximize();
+  else if (action === 'close') win.close();
+});
 
 app.whenReady().then(() => {
   const win = new BrowserWindow({
@@ -25,6 +32,7 @@ app.whenReady().then(() => {
     minHeight: 600,
     title: 'wpdev',
     backgroundColor: '#17140f',
+    frame: false,               // niente chrome X11: title bar custom in-app
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

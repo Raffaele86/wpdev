@@ -54,12 +54,21 @@
   code { font: 12px var(--font-data); color: var(--ink); }
   :focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-radius: 3px; }
 
-  /* ---------------------------------------------------------- top bar --- */
+  /* ------------------------------------------- top bar (= title bar) --- */
   #topbar {
     display: flex; align-items: center; gap: 20px;
-    padding: 0 16px; height: 52px; flex: none;
+    padding: 0 0 0 16px; height: 46px; flex: none;
     border-bottom: 1px solid var(--line); background: var(--surface);
+    -webkit-app-region: drag; user-select: none;
   }
+  #topbar button, #topbar a { -webkit-app-region: no-drag; }
+  .win-controls { display: flex; align-self: stretch; -webkit-app-region: no-drag; margin-left: 6px; }
+  .win-controls button {
+    width: 46px; border: none; border-radius: 0; background: transparent;
+    color: var(--muted); font: 13px var(--font-data); padding: 0; cursor: default;
+  }
+  .win-controls button:not(:disabled):hover { background: var(--surface-2); color: var(--ink); border: none; }
+  .win-controls button.close:not(:disabled):hover { background: var(--danger); color: #1a0c0a; }
   .brand { display: flex; align-items: baseline; gap: 8px; }
   .brand-led {
     align-self: center; width: 9px; height: 9px; border-radius: 50%;
@@ -297,6 +306,11 @@
     <div id="fleetReadout" class="fleet-readout"></div>
     <div class="top-actions">
       <button id="mailpitBtn" class="ghost">mailpit</button>
+    </div>
+    <div class="win-controls">
+      <button id="winMin" title="Riduci a icona">─</button>
+      <button id="winMax" title="Ingrandisci">▢</button>
+      <button id="winClose" class="close" title="Chiudi">✕</button>
     </div>
   </div>
 
