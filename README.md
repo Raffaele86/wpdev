@@ -20,7 +20,7 @@ wpdev selftest             # suite di accettazione end-to-end (crea/verifica/eli
 
 | Comando | Cosa fa |
 |---|---|
-| `wpdev new <slug> [--blueprint <n>] [--php 8.3] [--title ..] [--locale it_IT]` | crea un sito WP completo su `https://<slug>.localhost:8443` |
+| `wpdev new <slug> [--blueprint <n>] [--php 8.3] [--title ..] [--locale it_IT]` | crea un sito WP completo su `https://<slug>.localhost:8443` (con `--blueprint rn-engine`: parent brandizzato + child theme `<slug>` già attivo) |
 | `wpdev list` | elenca i siti con stato e Live Link |
 | `wpdev start\|stop\|restart <slug>\|--all` | gestisce fpm + vhost del sito |
 | `wpdev delete <slug> [--yes]` | elimina TUTTO senza residui (webroot, db, vhost, hosts, registry) |
@@ -34,7 +34,7 @@ wpdev selftest             # suite di accettazione end-to-end (crea/verifica/eli
 | `wpdev export <slug>` | zip webroot + dump .sql in `D:\NAS\WPDev\exports` (`exportsDir` in config.json) |
 | `wpdev import <zip> <slug> [--sql f] [--source-url u]` | importa da zip (formato export) |
 | `wpdev import --from-remote u@host:/path <slug>` | importa da server via ssh (webroot + `wp db export` remoto) |
-| `wpdev blueprint list` / `blueprint save <slug> <nome>` | gestione blueprint |
+| `wpdev blueprint list` / `blueprint save <slug> <nome>` | gestione blueprint (standard: `rn-engine`, genera child per-slug) |
 | `wpdev php <slug> <ver>` / `wpdev xdebug <slug> on\|off` | versione PHP / xdebug per sito |
 | `wpdev logs <slug> [--tail N]` | log php/caddy/wp/cloudflared del sito |
 | `wpdev mailpit` | URL della UI Mailpit |
@@ -71,8 +71,8 @@ socket unix, locking fragile — stesso problema dello scheduler SQLITE_BUSY).
 - **HTTPS del Live Link**: il quick tunnel manda `Cf-Visitor`, non `X-Forwarded-Proto` —
   gestito nel template wp-config (URL dinamici da `HTTP_HOST`, quindi lo stesso sito risponde
   sia su `.localhost` sia sull'URL trycloudflare senza search-replace).
-- **Avviso certificato nel browser**: CA interna Caddy. Per eliminarlo, da Windows:
-  `certutil -addstore -user Root "\\wsl.localhost\Ubuntu\home\raffa\.wpdev\caddy\storage\pki\authorities\local\root.crt"`
+- **Avviso certificato nel browser**: risolto — la CA interna Caddy è installata nel trust
+  store utente Windows (lo fa setup.sh; da rifare solo se si rigenera la CA in `caddy/storage`).
 - **`setcap` si perde** se sostituisci il binario `~/.local/bin/caddy` → rilancia setup.sh.
 - **Multi-PHP**: predisposto (`phpVersion` per sito). Su Ubuntu 24.04 c'è solo 8.3; per altre:
   `sudo add-apt-repository ppa:ondrej/php && sudo apt install php8.4-fpm php8.4-{mysql,gd,mbstring,xml,zip,intl,imagick}`

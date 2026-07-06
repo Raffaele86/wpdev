@@ -16,6 +16,8 @@ export interface BlueprintManifest {
   activate: string | null;
   seedSql: string | null;   // filename relativo alla dir del blueprint
   baseUrl: string | null;   // URL del sito d'origine (per search-replace del seed)
+  childFrom?: string | null;     // dir template del child: genera themes/<slug>/ e lo attiva
+  childTemplate?: string | null; // valore Template: del child (nome cartella parent)
 }
 
 function bpDir(name: string): string { return path.join(BLUEPRINTS_DIR, name); }
@@ -67,7 +69,31 @@ export async function applyBlueprint(site: Site, name: string, emit: Emit): Prom
       await wp(site, ['user', 'update', site.adminUser, `--user_pass=${site.adminPass}`]);
     }
   }
-  if (bp.activate) {
+  if (bp.childFrom) {
+    // Child theme per-sito: cartella = slug, Theme Name = titolo del sito.
+    const childDst = path.join(site.webroot, 'wp-content', 'themes', site.slug);
+    emit(`blueprint: genero child theme "${site.slug}"`);
+    await runOk('rsync', ['-a', '--exclude=node_modules',
+      path.join(dir, bp.childFrom) + '/', childDst + '/']);
+    const parent = bp.childTemplate ?? bp.themes[0];
+    const header = [
+      '/*',
+      `Theme Name: ${site.name}`,
+      `Template: ${parent}`,
+      'Author: Raffaele Nocera',
+      'Author URI: https://raffaelenocera.com/',
+      `Description: Tema su misura per ${site.name}, costruito su RN Engine (raffaelenocera.com).`,
+      'Version: 1.0.0',
+      `Text Domain: ${site.slug}`,
+      '*/',
+    ].join('\n');
+    const styleFile = path.join(childDst, 'style.css');
+    const oldCss = fs.readFileSync(styleFile, 'utf8');
+    const body = oldCss.includes('*/') ? oldCss.slice(oldCss.indexOf('*/') + 2) : oldCss;
+    fs.writeFileSync(styleFile, header + '\n' + body);
+    emit(`blueprint: attivo tema ${site.slug}`);
+    await wp(site, ['theme', 'activate', site.slug]);
+  } else if (bp.activate) {
     emit(`blueprint: attivo tema ${bp.activate}`);
     await wp(site, ['theme', 'activate', bp.activate]);
   }

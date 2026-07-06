@@ -30,28 +30,44 @@ if (helperInstalled() && !hostInEtcHosts('adminer.localhost')) {
   catch (err) { console.log(`avviso: hosts adminer non registrato — ${(err as Error).message}`); }
 }
 
-// Blueprint bottega dal tema in ~/bottega-theme (parent + child sample, senza node_modules)
+// Blueprint rn-engine: parent brandizzato (rebrand del solo header di style.css, i prefissi
+// interni bottega_* restano) + template del child (generato per-slug alla creazione del sito).
 const bottegaSrc = path.join(os.homedir(), 'bottega-theme');
-const bpDir = path.join(BLUEPRINTS_DIR, 'bottega');
+const bpDir = path.join(BLUEPRINTS_DIR, 'rn-engine');
 if (fs.existsSync(path.join(bottegaSrc, 'bottega'))) {
   const { execFileSync } = await import('node:child_process');
+  const parentDst = path.join(bpDir, 'themes', 'rn-engine');
   fs.mkdirSync(path.join(bpDir, 'themes'), { recursive: true });
-  for (const theme of ['bottega', 'bottega-child-sample']) {
-    const src = path.join(bottegaSrc, theme);
-    if (!fs.existsSync(src)) continue;
+  execFileSync('rsync', ['-a', '--delete', '--exclude=node_modules',
+    path.join(bottegaSrc, 'bottega') + '/', parentDst + '/']);
+  // Rebrand SOLO l'header visibile del parent
+  const styleFile = path.join(parentDst, 'style.css');
+  let css = fs.readFileSync(styleFile, 'utf8');
+  css = css
+    .replace(/^Theme Name:.*$/m, 'Theme Name: RN Engine — raffaelenocera.com')
+    .replace(/^Description:.*$/m, 'Description: Motore WordPress su misura di raffaelenocera.com: veloce, sicuro, zero CLS. Base per il tema del sito, costruito come child.');
+  fs.writeFileSync(styleFile, css);
+
+  // Template del child (da bottega-child-sample): applicato per-slug da applyBlueprint
+  const childSrc = path.join(bottegaSrc, 'bottega-child-sample');
+  if (fs.existsSync(childSrc)) {
     execFileSync('rsync', ['-a', '--delete', '--exclude=node_modules',
-      src + '/', path.join(bpDir, 'themes', theme) + '/']);
+      childSrc + '/', path.join(bpDir, 'child-template') + '/']);
   }
   writeJsonAtomic(path.join(bpDir, 'manifest.json'), {
-    name: 'bottega',
-    description: 'starter WP con tema Bottega (parent) + child sample, da ~/bottega-theme',
-    themes: ['bottega', 'bottega-child-sample'].filter((t) => fs.existsSync(path.join(bpDir, 'themes', t))),
+    name: 'rn-engine',
+    description: 'RN Engine (parent brandizzato) + child generato con lo slug del sito',
+    themes: ['rn-engine'],
     plugins: [],
-    activate: 'bottega',
+    activate: null,
     seedSql: null,
     baseUrl: null,
+    childFrom: fs.existsSync(childSrc) ? 'child-template' : null,
+    childTemplate: 'rn-engine',
   });
-  console.log('blueprint "bottega" creato/aggiornato');
+  // Il vecchio blueprint bottega è sostituito
+  fs.rmSync(path.join(BLUEPRINTS_DIR, 'bottega'), { recursive: true, force: true });
+  console.log('blueprint "rn-engine" creato/aggiornato (bottega rimosso)');
 } else {
-  console.log('avviso: ~/bottega-theme/bottega non trovato — blueprint bottega saltato');
+  console.log('avviso: ~/bottega-theme/bottega non trovato — blueprint rn-engine saltato');
 }

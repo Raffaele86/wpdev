@@ -128,8 +128,22 @@ for svc in wpdev-caddy wpdev-mailpit wpdevd; do
   note "$svc: $state"
 done
 
+say "Certificato: CA wpdev nel trust store utente Windows (niente warning browser)"
+CRT="$STATE/caddy/storage/pki/authorities/local/root.crt"
+if [[ -f "$CRT" ]]; then
+  cp "$CRT" /mnt/c/Users/Raffaele/AppData/Local/Temp/wpdev-root.crt
+  if /mnt/c/Windows/System32/certutil.exe -user -store Root 2>/dev/null | grep -q "Caddy Local Authority"; then
+    note "CA già presente nel trust store"
+  else
+    note "installo la CA (accetta la finestra di conferma su Windows)…"
+    /mnt/c/Windows/System32/certutil.exe -addstore -user Root 'C:\Users\Raffaele\AppData\Local\Temp\wpdev-root.crt' >/dev/null 2>&1 || note "AVVISO: installazione CA saltata/rifiutata"
+  fi
+else
+  note "root.crt non ancora generato (parte al primo sito https)"
+fi
+
 say "Fatto"
-note "prova:  wpdev new demo --blueprint bottega"
+note "prova:  wpdev new demo --blueprint rn-engine"
 note "GUI:    cd $REPO/gui && npm install && wpdev gui"
 note "CA per il browser Windows (opzionale, elimina l'avviso certificato):"
 note "  certutil -addstore -user Root '\\\\wsl.localhost\\Ubuntu\\home\\$USER\\.wpdev\\caddy\\storage\\pki\\authorities\\local\\root.crt' (da Windows)"
