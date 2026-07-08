@@ -59,7 +59,7 @@ export const HOSTS_HELPER = '/usr/local/sbin/wpdev-hosts';
 
 export const DEFAULT_PHP_VERSION = '8.3';
 export const DEFAULT_LOCALE = 'it_IT';
-export const ADMIN_EMAIL = 'admin@example.com';
+export const ADMIN_EMAIL = process.env.WPDEV_ADMIN_EMAIL ?? 'admin@example.com';
 
 export function fpmBin(version: string): string {
   return `/usr/sbin/php-fpm${version}`;
