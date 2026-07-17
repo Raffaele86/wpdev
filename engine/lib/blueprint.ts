@@ -57,7 +57,7 @@ export async function applyBlueprint(site: Site, name: string, emit: Emit): Prom
     emit(`blueprint: copio mu-plugin ${mu}`);
     const muDir = path.join(site.webroot, 'wp-content', 'mu-plugins');
     fs.mkdirSync(muDir, { recursive: true });
-    fs.copyFileSync(path.join(dir, 'mu-plugins', mu), path.join(muDir, mu));
+    fs.cpSync(path.join(dir, 'mu-plugins', mu), path.join(muDir, mu), { recursive: true });
   }
   if (bp.seedSql) {
     emit('blueprint: importo seed database');
