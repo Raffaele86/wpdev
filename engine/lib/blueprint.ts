@@ -18,6 +18,7 @@ export interface BlueprintManifest {
   baseUrl: string | null;   // URL del sito d'origine (per search-replace del seed)
   childFrom?: string | null;     // dir template del child: genera themes/<slug>/ e lo attiva
   childTemplate?: string | null; // valore Template: del child (nome cartella parent)
+  muPlugins?: string[];          // file .php in mu-plugins/ del blueprint → wp-content/mu-plugins/
 }
 
 function bpDir(name: string): string { return path.join(BLUEPRINTS_DIR, name); }
@@ -51,6 +52,12 @@ export async function applyBlueprint(site: Site, name: string, emit: Emit): Prom
     await runOk('rsync', ['-a', '--exclude=node_modules',
       path.join(dir, 'plugins', plugin) + '/',
       path.join(site.webroot, 'wp-content', 'plugins', plugin) + '/']);
+  }
+  for (const mu of bp.muPlugins ?? []) {
+    emit(`blueprint: copio mu-plugin ${mu}`);
+    const muDir = path.join(site.webroot, 'wp-content', 'mu-plugins');
+    fs.mkdirSync(muDir, { recursive: true });
+    fs.copyFileSync(path.join(dir, 'mu-plugins', mu), path.join(muDir, mu));
   }
   if (bp.seedSql) {
     emit('blueprint: importo seed database');
