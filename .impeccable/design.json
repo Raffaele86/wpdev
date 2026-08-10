@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-10T00:00:00Z",
+  "title": "Design System: wpdev",
+  "extensions": {
+    "paletteSource": {
+      "origin": "raffaelenocera.com — active theme raffaelenocera-v3",
+      "file": "~/wpdev-sites/raffaelenocera/app/public/wp-content/themes/raffaelenocera-v3/tailwind.config.js",
+      "ramps": ["graphite (grounds)", "steel (foregrounds)", "copper (accent)"],
+      "exception": "--risk #e5484d is NOT from this source. The theme ships one accent and declares no state colours; copper is itself an orange, so 'apri' and 'elimina' would have shared a hue. Added functional signal only — never a brand colour.",
+      "syncNote": "If the theme's ramps move, these tokens must move with them. The <select> chevron additionally hard-codes %23b8723c inside its data: URI."
+    },
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Copper",
+        "canonical": "#b8723c",
+        "source": "copper-400",
+        "contrastOnBlack": "5.0:1",
+        "tonalRamp": ["#5A341A", "#774521", "#9A5C2E", "#B8723C", "#D08F58", "#E5B68A", "#F4DCC4", "#FBF1E9"]
+      },
+      "accent-hi": {
+        "role": "primary",
+        "displayName": "Copper Bright",
+        "canonical": "#d08f58",
+        "source": "copper-300",
+        "contrastOnBlack": "7.1:1",
+        "note": "Declared in the token block but referenced by nothing in the build. Reserved hover/emphasis step of the accent ramp, not an established role."
+      },
+      "risk": {
+        "role": "secondary",
+        "displayName": "Signal Red",
+        "canonical": "#e5484d",
+        "source": "added functional signal — not from the brand theme",
+        "contrastOnBlack": "4.9:1",
+        "tonalRamp": [
+          "oklch(20% 0.07 25)",
+          "oklch(31% 0.11 25)",
+          "oklch(42% 0.15 25)",
+          "oklch(53% 0.19 25)",
+          "oklch(62% 0.19 25)",
+          "oklch(74% 0.14 25)",
+          "oklch(85% 0.09 25)",
+          "oklch(94% 0.03 25)"
+        ]
+      },
+      "black": {
+        "role": "neutral",
+        "displayName": "Graphite Ground",
+        "canonical": "#0e1013",
+        "source": "graphite-950",
+        "tonalRamp": ["#0E1013", "#14171C", "#1B1F26", "#262B33", "#353A43", "#4A5059", "#6B7280", "#8C939E"],
+        "note": "Body ground, asset plane, console, focused finder input."
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "Graphite Surface",
+        "canonical": "#14171c",
+        "source": "graphite-900",
+        "note": "Chrome plane: topbar, rails, index column, dialog surface, log blocks."
+      },
+      "raise": {
+        "role": "neutral",
+        "displayName": "Graphite Raised",
+        "canonical": "#1b1f26",
+        "source": "graphite-800",
+        "note": "Touch plane: row hover, resting finder input, select fill, skeleton bars."
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "Steel Bright",
+        "canonical": "#f2f4f7",
+        "source": "steel-100",
+        "contrastOnBlack": "17.4:1",
+        "tonalRamp": ["#6B7280", "#8C939E", "#B9BFC8", "#DDE1E7", "#F2F4F7"],
+        "note": "The identifier colour. There is no pure white in the system."
+      },
+      "dim": {
+        "role": "neutral",
+        "displayName": "Steel Read",
+        "canonical": "#b9bfc8",
+        "source": "steel-300",
+        "contrastOnBlack": "10.3:1",
+        "note": "All secondary text: slugs, spec keys, placeholders, prose, console output."
+      },
+      "off": {
+        "role": "neutral",
+        "displayName": "Steel Inert",
+        "canonical": "#8c939e",
+        "source": "steel-400",
+        "contrastOnBlack": "6.2:1",
+        "note": "Disabled button labels only."
+      },
+      "faint": {
+        "role": "neutral",
+        "displayName": "Steel Mute",
+        "canonical": "#6b7280",
+        "source": "steel-500",
+        "contrastOnBlack": "3.9:1",
+        "note": "Strokes only — fails AA for normal text, which is why it is restricted to borders. Used at 55% for the disabled button border."
+      },
+      "rule": {
+        "role": "primary",
+        "displayName": "Rule",
+        "canonical": "rgba(184,114,60,0.30)",
+        "note": "Every structural hairline: panel borders, spec separators, section bars, input borders."
+      },
+      "rule-hi": {
+        "role": "primary",
+        "displayName": "Rule Bright",
+        "canonical": "rgba(184,114,60,0.62)",
+        "note": "Load-bearing hairlines: button outline, console top edge, .frame crop ticks, scrollbar thumb."
+      },
+      "wash": {
+        "role": "primary",
+        "displayName": "Wash",
+        "canonical": "rgba(184,114,60,0.12)",
+        "note": "Hover fill and selected-row background."
+      },
+      "wash-risk": {
+        "role": "secondary",
+        "displayName": "Wash Risk",
+        "canonical": "rgba(229,72,77,0.14)",
+        "note": "Hover fill of the destructive button, and nothing else."
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The selected asset's real name in the header. The largest object on screen. Anton only." },
+      "headline": { "displayName": "Headline", "purpose": "No-selection headline, or the single search result's name promoted into the empty panel." },
+      "title": { "displayName": "Title", "purpose": "Dialog titles; the failure panel heading is the same face at a fixed 30px." },
+      "body": { "displayName": "Body", "purpose": "Document default. Everything unstated inherits JetBrains Mono 13px/1.5." },
+      "data": { "displayName": "Data", "purpose": "Spec values, dialog inputs, inline code. Wraps with overflow-wrap:anywhere rather than truncating." },
+      "prose": { "displayName": "Prose", "purpose": "Explanatory sentences only, inside .prose and .empty p, capped 64-68ch. Archivo appears nowhere else." },
+      "control": { "displayName": "Control", "purpose": "All buttons (0.1em) and tabs (0.12em), uppercase mono." },
+      "label": { "displayName": "Label", "purpose": "Every field key, section header and rail caption. Copper by default, --dim under the .q modifier." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "toast-in", "value": "opacity .16s ease-out, transform .16s ease-out", "purpose": "The only transition in the stylesheet. Toast fades in and rises 6px." },
+      { "name": "reduced-motion", "value": "@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }", "purpose": "Global kill switch; all motion is suppressed." }
+    ],
+    "breakpoints": [
+      { "name": "rails-drop", "value": "1080px", "purpose": "Both 34px rails are removed entirely below this width." },
+      { "name": "compact", "value": "960px", "purpose": "Index narrows 292px to 230px; version chip and keycap hint drop; asset header collapses to one column and the spec block flips to left-aligned max-content pairs." }
+    ],
+    "patterns": [
+      { "name": "hazard", "value": "repeating-linear-gradient(-45deg, #e5484d 0 6px, transparent 6px 12px)", "purpose": "Red hazard stripe. Failure panel band and destructive dialog band only." },
+      { "name": "hazard-m", "value": "repeating-linear-gradient(-45deg, #b8723c 0 6px, transparent 6px 12px)", "purpose": "Copper hazard stripe. The redaction bar over a contained secret only." },
+      { "name": "dots", "value": "radial-gradient(circle at 1px 1px, rgba(184,114,60,.18) 1px, transparent 0) 0 0/22px 22px", "purpose": "Texture of the asset working plane; distinguishes it from the flat chrome." }
+    ],
+    "cornerMarks": [
+      { "name": "brk", "meaning": "registered / active", "value": "four solid-copper 8px L-brackets, 1px, inset 2px, drawn as eight linear-gradient backgrounds on ::before", "appliesTo": "selected row, keyboard-cursor row, focused finder" },
+      { "name": "frame", "meaning": "framed block", "value": "four 9px crop ticks in rule-hi, top corners on ::before and bottom corners on ::after", "appliesTo": "asset header only" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Solid copper fill. At most one per visible context — apri, nuovo sito, avvia live link, dialog confirm. Hover inverts to steel-100, not to a brighter copper.",
+      "html": "<button class=\"ds-btn ds-btn-primary\"><svg class=\"ds-ico\" width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"square\" aria-hidden=\"true\"><path d=\"M13 4h7v7M20 4l-9 9\"/><path d=\"M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5\"/></svg>apri</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; gap: 7px; font: 500 11px/1 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; border-radius: 0; padding: 8px 11px; cursor: pointer; } .ds-btn-primary { background: var(--accent, #b8723c); border: 1px solid var(--accent, #b8723c); color: var(--black, #0e1013); } .ds-btn-primary:hover { background: var(--white, #f2f4f7); border-color: var(--white, #f2f4f7); color: var(--black, #0e1013); } .ds-btn-primary:focus-visible { outline: 2px solid var(--accent, #b8723c); outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "The default button. Transparent with a 62%-copper hairline. Hover fills with a 12% copper wash; active inverts to solid copper.",
+      "html": "<button class=\"ds-btn ds-btn-ghost\"><svg class=\"ds-ico\" width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"square\" aria-hidden=\"true\"><path d=\"M4 12h15M13 6l6 6-6 6\"/></svg>admin</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: var(--accent, #b8723c); border: 1px solid var(--rule-hi, rgba(184,114,60,.62)); } .ds-btn-ghost:hover { background: var(--wash, rgba(184,114,60,.12)); border-color: var(--accent, #b8723c); } .ds-btn-ghost:active { background: var(--accent, #b8723c); color: var(--black, #0e1013); } .ds-btn-ghost:focus-visible { outline: 2px solid var(--accent, #b8723c); outline-offset: 2px; }"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Secondary tool shelf and lifecycle controls. Steel-300 label on a steel-500 border; hover goes steel-100 on steel-100 with no fill. Disabled keeps its border at 55% and drops to steel-400.",
+      "html": "<button class=\"ds-btn ds-btn-quiet\"><svg class=\"ds-ico\" width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"square\" aria-hidden=\"true\"><path d=\"M4 6l6 6-6 6M12 18h8\"/></svg>wp-cli</button>",
+      "css": ".ds-btn-quiet { background: transparent; color: var(--dim, #b9bfc8); border: 1px solid var(--faint, #6b7280); } .ds-btn-quiet:hover:not(:disabled) { color: var(--white, #f2f4f7); border-color: var(--white, #f2f4f7); background: transparent; } .ds-btn-quiet:disabled { color: var(--off, #8c939e); border-color: rgba(107,114,128,.55); cursor: not-allowed; } .ds-btn-quiet:focus-visible { outline: 2px solid var(--accent, #b8723c); outline-offset: 2px; }"
+    },
+    {
+      "name": "Risk Button",
+      "kind": "button",
+      "refersTo": "button-risk",
+      "description": "Irreversible actions only, and only under a section header reading 'irreversibile'. Its focus ring overrides the global copper to red so a destructive control is never haloed in the action colour.",
+      "html": "<button class=\"ds-btn ds-btn-risk\"><svg class=\"ds-ico\" width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"square\" aria-hidden=\"true\"><path d=\"M4 6h16M9 6V4h6v2M6 6l1 14h10l1-14M10 10v6M14 10v6\"/></svg>elimina sito</button>",
+      "css": ".ds-btn-risk { background: transparent; color: var(--risk, #e5484d); border: 1px solid rgba(229,72,77,.55); } .ds-btn-risk:hover { background: var(--wash-risk, rgba(229,72,77,.14)); border-color: var(--risk, #e5484d); } .ds-btn-risk:focus-visible { outline: 2px solid var(--risk, #e5484d); outline-offset: 2px; }"
+    },
+    {
+      "name": "Finder Input",
+      "kind": "input",
+      "refersTo": "input-finder",
+      "description": "Owns the topbar's free space; reachable with Ctrl/Cmd+K or /. On focus the fill drops to the ground plane and the wrapper draws the same four registration brackets as a selected row.",
+      "html": "<div class=\"ds-finder\"><svg class=\"ds-finder-ico\" width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"square\" aria-hidden=\"true\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"M15.5 15.5 21 21\"/></svg><input class=\"ds-finder-in\" type=\"text\" placeholder=\"cerca per nome o slug\" autocomplete=\"off\" spellcheck=\"false\" aria-label=\"Cerca un sito per nome o slug\"><span class=\"ds-kbd\" aria-hidden=\"true\"><i>CTRL</i><i>K</i></span></div>",
+      "css": ".ds-finder { display: flex; align-items: center; position: relative; padding: 9px 12px; background: var(--ground, #14171c); } .ds-finder-ico { position: absolute; left: 22px; color: var(--accent, #b8723c); pointer-events: none; z-index: 1; } .ds-finder-in { width: 100%; height: 28px; background: var(--raise, #1b1f26); color: var(--white, #f2f4f7); border: 1px solid var(--rule, rgba(184,114,60,.30)); border-radius: 0; padding: 0 74px 0 32px; font: 400 12px 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .02em; } .ds-finder-in::placeholder { color: var(--dim, #b9bfc8); } .ds-finder-in:focus { outline: none; border-color: var(--accent, #b8723c); background: var(--black, #0e1013); } .ds-finder:focus-within::before { content: ''; position: absolute; inset: 15px 9px; pointer-events: none; z-index: 2; background: linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 0 0/8px 1px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 0 0/1px 8px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 100% 0/8px 1px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 100% 0/1px 8px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 0 100%/8px 1px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 0 100%/1px 8px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 100% 100%/8px 1px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 100% 100%/1px 8px no-repeat; } .ds-kbd { position: absolute; right: 20px; display: flex; gap: 4px; pointer-events: none; } .ds-kbd i { font: 500 9px/1 'JetBrains Mono', ui-monospace, monospace; font-style: normal; letter-spacing: .06em; color: var(--dim, #b9bfc8); border: 1px solid var(--faint, #6b7280); padding: 3px 4px; }"
+    },
+    {
+      "name": "Index Row (selected)",
+      "kind": "nav",
+      "refersTo": "index-row-selected",
+      "description": "Status dot / name+slug / trailing chip on a 3-column grid. Selected takes a copper wash, a copper name and four registration brackets. The slug is suppressed when it is the same word as the name. A healthy dot is transparent. The live chip takes the accent, not the risk colour.",
+      "html": "<div class=\"ds-row ds-row-sel\" role=\"option\" aria-selected=\"true\"><span class=\"ds-dot ds-dot-on\"></span><span class=\"ds-rowtext\"><span class=\"ds-nm\">Demo Bottega</span><span class=\"ds-sg\">demo</span></span><span class=\"ds-live\">live</span></div>",
+      "css": ".ds-row { position: relative; display: grid; grid-template-columns: 14px 1fr auto; align-items: center; gap: 9px; padding: 7px 12px; cursor: pointer; background: var(--ground, #14171c); } .ds-row:hover { background: var(--raise, #1b1f26); } .ds-row-sel { background: var(--wash, rgba(184,114,60,.12)); } .ds-row-sel::before { content: ''; position: absolute; inset: 2px; pointer-events: none; background: linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 0 0/8px 1px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 0 0/1px 8px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 100% 0/8px 1px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 100% 0/1px 8px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 0 100%/8px 1px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 0 100%/1px 8px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 100% 100%/8px 1px no-repeat, linear-gradient(var(--accent, #b8723c), var(--accent, #b8723c)) 100% 100%/1px 8px no-repeat; } .ds-dot { width: 7px; height: 7px; justify-self: center; } .ds-dot-on { background: transparent; } .ds-dot-err { background: var(--risk, #e5484d); } .ds-dot-off { background: transparent; box-shadow: inset 0 0 0 1.5px var(--risk, #e5484d); } .ds-rowtext { min-width: 0; overflow: hidden; } .ds-nm, .ds-sg { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-nm { font: 500 12px/1.35 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .01em; color: var(--accent, #b8723c); } .ds-sg { font: 400 10px/1.35 'JetBrains Mono', ui-monospace, monospace; color: var(--dim, #b9bfc8); } .ds-live { font: 500 9px/1 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .08em; color: var(--black, #0e1013); background: var(--accent, #b8723c); padding: 3px 4px; }"
+    },
+    {
+      "name": "Tab Strip",
+      "kind": "nav",
+      "refersTo": "tab-selected",
+      "description": "Uppercase mono on a hairline baseline. The selected tab is a solid copper block with graphite text — the same fill as a primary button, because the tab is the current place.",
+      "html": "<div class=\"ds-tabs\" role=\"tablist\"><button class=\"ds-tab ds-tab-sel\" role=\"tab\" aria-selected=\"true\">panoramica</button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\">live link</button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\">log</button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\">mailpit</button></div>",
+      "css": ".ds-tabs { display: flex; padding: 0 20px; gap: 2px; border-bottom: 1px solid var(--rule, rgba(184,114,60,.30)); background: var(--black, #0e1013); } .ds-tab { font: 500 11px/1 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--dim, #b9bfc8); background: transparent; border: none; border-bottom: 2px solid transparent; padding: 12px 12px 10px; cursor: pointer; margin-bottom: -1px; } .ds-tab:hover { color: var(--white, #f2f4f7); } .ds-tab-sel { color: var(--black, #0e1013); background: var(--accent, #b8723c); border-bottom-color: var(--accent, #b8723c); } .ds-tab:focus-visible { outline: 2px solid var(--accent, #b8723c); outline-offset: 2px; }"
+    },
+    {
+      "name": "Asset Header",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Signature block. The site's real name in Anton at up to 68px on the left with slug, class select and primary action; the three genuinely variable facts right-aligned in a compact spec grid. Marked at all four corners with crop ticks. The PHP version is deliberately absent: it is identical across the fleet.",
+      "html": "<div class=\"ds-ah ds-frame\"><div><h1 class=\"ds-ah-name\">Demo Bottega</h1><div class=\"ds-ah-sub\"><code>demo</code></div></div><div class=\"ds-ah-spec\"><span class=\"ds-lbl ds-lbl-q\">stato</span><span class=\"ds-v\">operativo</span><span class=\"ds-lbl ds-lbl-q\">blueprint</span><span class=\"ds-v\">bottega</span><span class=\"ds-lbl ds-lbl-q\">creato</span><span class=\"ds-v\">02/07/2026</span></div></div>",
+      "css": ".ds-ah { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 20px; align-items: start; border-bottom: 1px solid var(--rule, rgba(184,114,60,.30)); padding: 10px 12px 14px; background: var(--black, #0e1013); } .ds-frame { position: relative; } .ds-frame::before, .ds-frame::after { content: ''; position: absolute; inset: 0; pointer-events: none; } .ds-frame::before { background: linear-gradient(var(--rule-hi, rgba(184,114,60,.62)), var(--rule-hi, rgba(184,114,60,.62))) 0 0/9px 1px no-repeat, linear-gradient(var(--rule-hi, rgba(184,114,60,.62)), var(--rule-hi, rgba(184,114,60,.62))) 0 0/1px 9px no-repeat, linear-gradient(var(--rule-hi, rgba(184,114,60,.62)), var(--rule-hi, rgba(184,114,60,.62))) 100% 0/9px 1px no-repeat, linear-gradient(var(--rule-hi, rgba(184,114,60,.62)), var(--rule-hi, rgba(184,114,60,.62))) 100% 0/1px 9px no-repeat; } .ds-frame::after { background: linear-gradient(var(--rule-hi, rgba(184,114,60,.62)), var(--rule-hi, rgba(184,114,60,.62))) 0 100%/9px 1px no-repeat, linear-gradient(var(--rule-hi, rgba(184,114,60,.62)), var(--rule-hi, rgba(184,114,60,.62))) 0 100%/1px 9px no-repeat, linear-gradient(var(--rule-hi, rgba(184,114,60,.62)), var(--rule-hi, rgba(184,114,60,.62))) 100% 100%/9px 1px no-repeat, linear-gradient(var(--rule-hi, rgba(184,114,60,.62)), var(--rule-hi, rgba(184,114,60,.62))) 100% 100%/1px 9px no-repeat; } .ds-ah-name { font: 400 clamp(30px, 4.6vw, 68px)/.9 'Anton', sans-serif; letter-spacing: -.005em; text-transform: uppercase; overflow-wrap: anywhere; color: var(--white, #f2f4f7); margin: 0; } .ds-ah-sub { display: flex; align-items: center; gap: 10px; margin-top: 9px; } .ds-ah-sub code { font: 400 12px 'JetBrains Mono', ui-monospace, monospace; color: var(--dim, #b9bfc8); } .ds-ah-spec { display: grid; grid-template-columns: auto auto; gap: 5px 12px; align-items: baseline; } .ds-lbl { font: 500 10px/1 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--accent, #b8723c); } .ds-lbl-q { color: var(--dim, #b9bfc8); } .ds-ah-spec .ds-v { font: 500 11px 'JetBrains Mono', ui-monospace, monospace; text-align: right; color: var(--white, #f2f4f7); }"
+    },
+    {
+      "name": "Secret Spec Row",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Signature block. A credential renders as a copper hazard-striped redaction bar with separate reveal and copy actions — copy never requires reveal. Revealed state is keyed slug:field and cleared on every site switch and tab change.",
+      "html": "<div class=\"ds-spec\"><span class=\"ds-lbl\">admin wp</span><span class=\"ds-v\"><span class=\"ds-red\" aria-label=\"valore nascosto\"></span></span><span class=\"ds-act\"><button class=\"ds-icon-btn\" title=\"mostra\" aria-label=\"mostra\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\"><path d=\"M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"2.6\"/></svg></button><button class=\"ds-icon-btn\" title=\"copia\" aria-label=\"copia\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"square\"><path d=\"M9 9h11v11H9zM15 5H4v11h5\"/></svg></button></span></div>",
+      "css": ".ds-spec { display: grid; grid-template-columns: 116px minmax(0,1fr) auto; background: var(--black, #0e1013); } .ds-spec > * { border-bottom: 1px solid var(--rule, rgba(184,114,60,.30)); padding: 10px 0; } .ds-spec .ds-lbl { font: 500 10px/1 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--accent, #b8723c); padding-right: 14px; align-self: center; } .ds-spec .ds-v { font: 400 12.5px 'JetBrains Mono', ui-monospace, monospace; color: var(--white, #f2f4f7); overflow-wrap: anywhere; align-self: center; } .ds-act { display: flex; gap: 2px; align-items: center; justify-content: flex-end; padding-left: 10px; } .ds-red { display: inline-flex; align-items: center; min-width: 108px; height: 17px; background: repeating-linear-gradient(-45deg, var(--accent, #b8723c) 0 6px, transparent 6px 12px); background-color: var(--black, #0e1013); border: 1px solid var(--rule, rgba(184,114,60,.30)); vertical-align: -4px; } .ds-icon-btn { display: inline-flex; padding: 5px; border: 1px solid transparent; border-radius: 0; background: transparent; color: var(--dim, #b9bfc8); cursor: pointer; } .ds-icon-btn:hover { color: var(--accent, #b8723c); background: var(--wash, rgba(184,114,60,.12)); } .ds-icon-btn:focus-visible { outline: 2px solid var(--accent, #b8723c); outline-offset: 2px; }"
+    },
+    {
+      "name": "Destructive Dialog",
+      "kind": "custom",
+      "refersTo": "dialog-surface",
+      "description": "Square 452px modal on the chrome plane. The destructive variant flips the border to red and adds a 7px red hazard band across the top; confirm becomes the risk button and initial focus goes to cancel, so a reflexive Enter cannot delete a site.",
+      "html": "<div class=\"ds-dlg ds-dlg-danger\"><div class=\"ds-dlg-hz\"></div><div class=\"ds-dlg-in\"><div class=\"ds-dlg-title\">Elimina sito</div><p class=\"ds-prose\">Elimina <b>demo</b> senza residui: webroot, database, vhost, voce hosts e registry. Non &egrave; reversibile.</p><div class=\"ds-dlg-actions\"><button class=\"ds-btn ds-btn-quiet\">annulla</button><button class=\"ds-btn ds-btn-risk\">elimina</button></div></div></div>",
+      "css": ".ds-dlg { background: var(--ground, #14171c); color: var(--white, #f2f4f7); border: 1px solid var(--accent, #b8723c); border-radius: 0; padding: 0; width: 452px; max-width: calc(100% - 32px); } .ds-dlg-danger { border-color: var(--risk, #e5484d); } .ds-dlg-hz { height: 7px; background: repeating-linear-gradient(-45deg, var(--risk, #e5484d) 0 6px, transparent 6px 12px); } .ds-dlg-in { padding: 18px 20px 20px; } .ds-dlg-title { font: 400 26px/1 'Anton', sans-serif; text-transform: uppercase; letter-spacing: .005em; margin-bottom: 4px; } .ds-prose { color: var(--dim, #b9bfc8); max-width: 68ch; margin: 10px 0 0; font: 400 13.5px/1.65 'Archivo', ui-sans-serif, system-ui, sans-serif; } .ds-prose b { color: var(--white, #f2f4f7); font-weight: 600; } .ds-dlg-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Registration Sleeve",
+    "overview": "The console is printed, not lit. A record sleeve from The Designers Republic, pressed on graphite paper in one metallic ink: copper, laid flat with no gradient, no glow, no bevel and no shadow. Every division between planes is a hairline rule, every active block is marked at its four corners the way a press sheet is marked for registration. The result reads as a printed technical document that happens to be interactive, not as a piece of software chrome.\n\nIts organising idea is identification before status. Sixteen local sites that report identical values — all running, all PHP 8.3, all on :8443 — are not sixteen equal rows to be badged sixteen times. So the biggest object on screen is the name of the one asset in hand, set in condensed display type at up to 68px, with its three genuinely variable facts (state, blueprint, creation date) set small and right-aligned beside it. Everything that is constant across the fleet is demoted, and everything that is normal is drawn as nothing at all: a healthy site has a transparent status dot. The screen only spends ink on exceptions.\n\nDensity is high and deliberately unpadded — 46px topbar, 7px row padding, 1px rules — because the operator is scanning identifiers, not reading. The two confirmed anti-references are the previous amber/rack identity, which was replaced outright rather than refined, and the fleet-of-equal-cards grid, whose repetition of constants is exactly what this layout refuses.",
+    "keyCharacteristics": [
+      "Graphite grounds with a single copper accent; red appears only as a functional risk signal.",
+      "Flat print: zero shadows, zero gradients on interactive surfaces, zero rounded corners.",
+      "Hairline copper rules and corner marks instead of boxes and fills.",
+      "Condensed display type reserved for names; monospace for every identifier.",
+      "State drawn only as exception — normal is invisible.",
+      "Hazard stripes as a rationed material, never as decoration."
+    ],
+    "rules": [
+      { "name": "The Two Voices Rule", "body": "Copper is intent — primary action, current selection, state indication. Red is consequence — risk, anomaly, destruction. Never borrow one for the other's job, including in focus: button.risk:focus-visible overrides the global copper focus ring to red so a destructive control is never haloed in the action colour. The live chip is the deliberate test case: a public URL is a state to notice, not a fault, so it takes the accent.", "section": "colors" },
+      { "name": "The State-As-Exception Rule", "body": "A healthy site draws no status mark at all — .dot.on is background: transparent, and the 7px column survives only to keep names aligned. Only failure is drawn: a solid red square for a running site with a dead pool, and a hollow red ring (inset 0 0 0 1.5px) for a stopped one. The same logic drives the right rail, whose reticle icon swaps to a warning triangle and turns red only when the daemon is down or some site is not up.", "section": "colors" },
+      { "name": "The Hairline-Only Rule", "body": "--faint never colours text. --off colours disabled labels and nothing else. --dim is the one grey allowed to carry running text.", "section": "colors" },
+      { "name": "The Single Accent Rule", "body": "The source theme ships one accent, and so does this console. There is no green, no yellow, no blue anywhere in the build: success is copper, failure is red. A new colour may only enter as a functional signal that cannot be expressed by the accent, and must be declared as such where --risk is declared.", "section": "colors" },
+      { "name": "The Names-Only Rule", "body": "Anton sets names and headlines: the asset name, the empty-state headline, the failure heading, the dialog title, the wordmark. It never sets a label, a button, a tab, a spec value, a row or a line of data. A condensed display face applied to data is how this world becomes a poster instead of a console.", "section": "typography" },
+      { "name": "The Monospace Identifier Rule", "body": "Anything the operator might read character-by-character or copy — slug, domain, path, URL, credential, count, log line, keycap — is JetBrains Mono. This is why mono is the document default rather than a special case.", "section": "typography" },
+      { "name": "The Prose Quarantine Rule", "body": "Archivo appears only inside .prose and .empty p. It never labels, never sits in a button, never carries a value. Its presence means: this is a sentence written for you, not a field read from the engine.", "section": "typography" },
+      { "name": "The Finder-First Rule", "body": "The search input owns the topbar's free space and is reachable from anywhere with Ctrl/Cmd+K or /. Any future screen puts finding above browsing.", "section": "layout" },
+      { "name": "The Subtractive Narrowing Rule", "body": "Narrow viewports remove ornament and redundancy — rails, chips, keycaps — and never reflow the asset panel into cards or an accordion. The name, the spec and the primary action survive every width.", "section": "layout" },
+      { "name": "The Flat Print Rule", "body": "Nothing in this world casts. If a surface needs to come forward, move it to the next graphite plane, give it a hairline, or mark its corners. Never reach for a shadow, a glow or a gradient fill.", "section": "elevation" },
+      { "name": "The Zero Radius Rule", "body": "No rounded corners anywhere, on any element, at any size. Curves exist only as drawn paths inside icons.", "section": "shapes" },
+      { "name": "The Two Marks Rule", "body": ".brk means selected/active and is always solid copper. .frame means framed block and is always --rule-hi. Do not mix them, do not apply both to one element, and do not invent a third corner device.", "section": "shapes" },
+      { "name": "The Hazard Rule", "body": "--hazard and --hazard-m appear in exactly three places: the redaction bar over a secret, the failure panel's band, and the destructive dialog's band. They are absent from all chrome, all headers and all decoration. A stripe on this screen means a real hazard; using it as texture destroys the only warning device the system has.", "section": "components" },
+      { "name": "The One Primary Rule", "body": "At most one solid-copper button per visible context. Everything else is ghost or quiet. The copper fill is what makes apri findable without a label hierarchy.", "section": "components" },
+      { "name": "The Render Signature Rule", "body": "Every render function computes a JSON signature of the exact state it draws (sig.index, sig.head, sig.tabs, sig.content, sig.rail) and returns early when nothing has changed. The surface polls the daemon every 4 seconds; without signatures every poll would rewrite innerHTML and destroy focus, typed search text, scroll position and the open select. Any new panel must key itself the same way and own its own signature slot — a component that redraws unconditionally is broken here regardless of how it looks.", "section": "components" },
+      { "name": "The Drawn-Icon Rule", "body": "Icons come from the local <defs> sprite, are stroked in currentColor on a 24x24 grid, and are always paired with a text label except in the window controls and per-row copy/reveal actions, which carry title and aria-label. No icon fonts, no emoji, no raster.", "section": "components" }
+    ],
+    "dos": [
+      "Do lead every screen with the thing that identifies the object — set the name in Anton at display size and demote the constants.",
+      "Do draw state only when it deviates. A healthy row shows a transparent dot; an all-healthy fleet shows no exceptions block at all.",
+      "Do keep copper as the only accent, and keep red for anomaly, failure and destruction only.",
+      "Do take any new palette value from the raffaelenocera-v3 theme's graphite / steel / copper ramps, and declare the exception in the stylesheet if a functional signal forces one.",
+      "Do use hairlines (--rule), the three graphite planes, and corner marks to build structure — in that order, before considering any other device.",
+      "Do reserve .brk for 'this is the selected/active one' and .frame for 'this is a framed block'.",
+      "Do set every identifier, path, credential, count and label in JetBrains Mono, and let long values wrap with overflow-wrap: anywhere rather than truncating them.",
+      "Do put explanatory sentences in Archivo inside .prose or .empty p, capped at 64-68ch.",
+      "Do give a destructive flow the red hazard band, the red border, a .risk confirm and initial focus on cancel.",
+      "Do keep secrets behind a hazard-striped redaction bar with separate reveal and copy actions, and clear the revealed set on every navigation.",
+      "Do give each new panel its own render signature and return early when its state is unchanged.",
+      "Do strip native appearance from any OS control and redraw its affordance — and remember the select chevron's colour is hard-coded inside its data: URI."
+    ],
+    "donts": [
+      "Don't add a shadow, glow, gradient fill, blur or backdrop-filter. This world is flat print; depth comes from planes, hairlines and corner marks.",
+      "Don't round a corner. border-radius: 0 is asserted everywhere on purpose.",
+      "Don't use hazard stripes as texture, header ornament or brand pattern — only for a contained secret, a failure panel, or an irreversible action.",
+      "Don't set Anton on a label, button, tab, spec value, table cell or any run of data.",
+      "Don't colour text with --faint; it measures 3.9:1 and is for strokes only.",
+      "Don't use #ffffff or #000000 as a surface or text colour — the brightest value is --white (steel-100) and the darkest is --black (graphite-950). True black appears only in the modal backdrop.",
+      "Don't put more than one solid-copper button in a context, and don't tint a risk control copper — including its focus ring.",
+      "Don't treat --risk as a brand colour or extend it into a red ramp for anything decorative.",
+      "Don't hide a disabled control or drop its border; keep it inert and readable at --off.",
+      "Don't repeat a value that is identical across every item in a list (PHP version, port, base domain) in the identification block — push it into detail.",
+      "Don't reintroduce the equal-card fleet grid, or the amber/rack palette this world replaced.",
+      "Don't rebuild any surface with confirm(), prompt() or alert(); in-world dialogs exist so the language never breaks.",
+      "Don't add motion beyond the toast's 160ms fade-and-rise, and never without honouring prefers-reduced-motion.",
+      "Don't ship a component that rewrites its innerHTML on every poll tick."
+    ]
+  }
+}

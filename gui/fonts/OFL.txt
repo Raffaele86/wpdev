@@ -1,4 +1,12 @@
-Copyright 2016 The Space Mono Project Authors (https://github.com/googlefonts/spacemono)
+Font inclusi in questa cartella, tutti distribuiti tramite Google Fonts:
+
+  Anton            — anton-400-*.woff2            (The Anton Project Authors)
+  JetBrains Mono   — jetbrains-mono-var-*.woff2   (The JetBrains Mono Project Authors)
+  Archivo          — archivo-var-*.woff2          (The Archivo Project Authors)
+
+Ciascuno è rilasciato sotto la SIL Open Font License, Version 1.1, il cui testo
+integrale è riportato qui sotto. Le righe di copyright complete di ogni famiglia
+stanno nei metadati del file e nel rispettivo repository upstream.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
