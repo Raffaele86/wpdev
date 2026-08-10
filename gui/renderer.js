@@ -517,6 +517,7 @@ async function renderContent() {
       '<div class="grid-actions">' +
       '<button id="bShell" class="quiet"><svg class="ico" width="13" height="13" viewBox="0 0 24 24"><use href="#i-terminal"/></svg>shell</button>' +
       '<button id="bCli" class="quiet"><svg class="ico" width="13" height="13" viewBox="0 0 24 24"><use href="#i-terminal"/></svg>wp-cli</button>' +
+      '<button id="bClaude" class="quiet"><svg class="ico" width="13" height="13" viewBox="0 0 24 24"><use href="#i-terminal"/></svg>claude</button>' +
       '<button id="bDb" class="quiet"><svg class="ico" width="13" height="13" viewBox="0 0 24 24"><use href="#i-db"/></svg>adminer</button>' +
       '<button id="bExport" class="quiet"><svg class="ico" width="13" height="13" viewBox="0 0 24 24"><use href="#i-box"/></svg>esporta</button>' +
       '<button id="bClone" class="quiet"><svg class="ico" width="13" height="13" viewBox="0 0 24 24"><use href="#i-copy"/></svg>clona</button>' +
@@ -532,6 +533,12 @@ async function renderContent() {
     const pub = $('#lnkPub'); if (pub) pub.onclick = () => openExt(d.share.url);
     $('#bShell').onclick = () => copy(`wpdev shell ${s.slug}`);
     $('#bCli').onclick = () => copy(`wpdev cli ${s.slug} -- `);
+    $('#bClaude').onclick = async () => {
+      const b = $('#bClaude'); b.disabled = true;
+      const r = await window.wpdev.claude(s.slug, d.webroot);
+      b.disabled = false;
+      toast(r?.ok ? `claude aperto in ${r.dir.split('/').pop()}` : (r?.error || 'apertura claude fallita'));
+    };
     $('#bDb').onclick = () => {
       const adminerBase = d.url.replace(`${d.domain}`, 'adminer.localhost');
       openExt(`${adminerBase}/?server=localhost&username=${d.db.user}&db=${d.db.name}`);

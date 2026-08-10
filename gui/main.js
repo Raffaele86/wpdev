@@ -1,7 +1,8 @@
 // wpdev GUI — main process. Tutta la logica sta in wpdevd: qui solo finestra + integrazioni OS.
 const { app, BrowserWindow, ipcMain, clipboard } = require('electron');
-const { spawn } = require('node:child_process');
+const { spawn, execFile } = require('node:child_process');
 const path = require('node:path');
+const fs = require('node:fs');
 
 // WSLg: il sandbox chromium non è disponibile
 app.commandLine.appendSwitch('no-sandbox');
@@ -13,6 +14,37 @@ function openInWindowsBrowser(url) {
     detached: true, stdio: 'ignore',
   }).unref();
 }
+
+// Claude Code sul tema attivo: wt.exe (interop) apre una finestra Windows
+// Terminal col claude di WSL già nella cartella del tema. Path assoluti:
+// wpdev non è nel PATH non-interattivo, wt.exe è un alias per-utente.
+const WPDEV_CLI = path.join(process.env.HOME ?? '/home/raffa', '.local/bin/wpdev');
+const WT_EXE = '/mnt/c/Users/Raffaele/AppData/Local/Microsoft/WindowsApps/wt.exe';
+
+function activeThemeDir(slug, webroot) {
+  return new Promise((resolve) => {
+    execFile(WPDEV_CLI, ['cli', slug, '--', 'option', 'get', 'stylesheet'],
+      { timeout: 15000 }, (err, stdout) => {
+        const themes = path.join(webroot, 'wp-content', 'themes');
+        // sito spento o wp-cli in errore: si apre comunque sulla cartella themes
+        const name = err ? '' : String(stdout).trim().split('\n').pop();
+        const dir = name ? path.join(themes, name) : themes;
+        resolve(fs.existsSync(dir) ? dir : themes);
+      });
+  });
+}
+
+ipcMain.handle('claude', async (_e, slug, webroot) => {
+  if (!/^[a-z0-9-]+$/.test(String(slug)) || !path.isAbsolute(String(webroot))) {
+    return { error: 'parametri non validi' };
+  }
+  const dir = await activeThemeDir(slug, webroot);
+  spawn(WT_EXE,
+    ['wsl.exe', '-d', 'Ubuntu', '-u', 'raffa', '--cd', dir, '--',
+      'bash', '-lc', 'exec claude --dangerously-skip-permissions'],
+    { detached: true, stdio: 'ignore' }).unref();
+  return { ok: true, dir };
+});
 
 ipcMain.handle('open-url', (_e, url) => openInWindowsBrowser(url));
 ipcMain.handle('copy', (_e, text) => clipboard.writeText(String(text)));
