@@ -59,6 +59,33 @@ export function removeShareVhost(slug: string): boolean {
   return false;
 }
 
+// Porte dichiarate in QUALSIASI frammento, inclusi i vhost scritti a mano che il registry non
+// conosce (es. le anteprime cliente su tunnel nominato): due blocchi sulla stessa porta fanno
+// fallire l'adapter con "ambiguous site definition".
+export function declaredPorts(): Set<number> {
+  const ports = new Set<number>();
+  if (!fs.existsSync(CADDY_SITES_DIR)) return ports;
+  for (const f of fs.readdirSync(CADDY_SITES_DIR)) {
+    if (!f.endsWith('.caddy')) continue;
+    const txt = fs.readFileSync(path.join(CADDY_SITES_DIR, f), 'utf8');
+    for (const m of txt.matchAll(/^\s*(?:https?:\/\/)?[^\s#{]*:(\d+)\s*\{/gm)) ports.add(Number(m[1]));
+  }
+  return ports;
+}
+
+// I quick tunnel non sopravvivono al daemon: al riavvio nessun vhost share deve restare,
+// nemmeno quello orfano lasciato da un `share` fallito a metà. Restituisce gli slug ripuliti.
+export function removeAllShareVhosts(): string[] {
+  if (!fs.existsSync(CADDY_SITES_DIR)) return [];
+  const removed: string[] = [];
+  for (const f of fs.readdirSync(CADDY_SITES_DIR)) {
+    if (!f.endsWith('-share.caddy')) continue;
+    fs.unlinkSync(path.join(CADDY_SITES_DIR, f));
+    removed.push(f.replace(/-share\.caddy$/, ''));
+  }
+  return removed;
+}
+
 export async function hashBasicAuth(password: string): Promise<string> {
   const res = await runOk(CADDY_BIN, ['hash-password', '--plaintext', password]);
   return res.stdout.trim();

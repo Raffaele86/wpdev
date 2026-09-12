@@ -16,7 +16,7 @@ import { createSiteDb, dropSiteDb, dumpDb, importDb } from './db.ts';
 import { startFpm, stopFpm, fpmRunning, removeFpmConf, checkPhpVersion } from './phpfpm.ts';
 import {
   writeSiteVhost, removeSiteVhost, writeShareVhost, removeShareVhost,
-  reloadCaddy, hashBasicAuth, caddyRunning,
+  reloadCaddy, hashBasicAuth, caddyRunning, declaredPorts, removeAllShareVhosts,
 } from './caddy.ts';
 import { addHost, removeHost, hostInEtcHosts } from './hosts.ts';
 import { downloadCore, writeWpConfig, installWp, isInstalled, ensureLoginPlugin, magicLoginUrl, searchReplace, wpTry } from './wp.ts';
@@ -330,21 +330,29 @@ export async function shareSite(slug: string, auth: string | undefined, emit: Em
     authUser = auth.slice(0, i);
     authPass = auth.slice(i + 1);
   }
-  const port = site.share?.port ?? nextSharePort(SHARE_PORT_BASE);
+  const port = site.share?.port ?? await nextSharePort(SHARE_PORT_BASE, declaredPorts());
   site.share = { port, url: null, authUser, authPass, pid: null };
 
   emit(`vhost condivisione su 127.0.0.1:${port} (basic auth: ${authUser})`);
   const hash = await hashBasicAuth(authPass);
   await writeShareVhost(site, hash);
-  await reloadCaddy();
+  try {
+    await reloadCaddy();
 
-  emit('avvio quick tunnel cloudflared…');
-  const { url, pid } = await startQuickTunnel(slug, `http://127.0.0.1:${port}`);
-  site.share.url = url;
-  site.share.pid = pid;
-  upsertSite(site);
-  emit(`Live Link attivo: ${url} (auth ${authUser}:${authPass})`);
-  return { url, authUser, authPass };
+    emit('avvio quick tunnel cloudflared…');
+    const { url, pid } = await startQuickTunnel(slug, `http://127.0.0.1:${port}`);
+    site.share.url = url;
+    site.share.pid = pid;
+    upsertSite(site);
+    emit(`Live Link attivo: ${url} (auth ${authUser}:${authPass})`);
+    return { url, authUser, authPass };
+  } catch (err) {
+    // Senza rollback il frammento resta sul disco e rompe ogni reload successivo
+    // (il registry non lo vede: upsertSite avviene solo a successo).
+    removeShareVhost(slug);
+    await reloadCaddy().catch(() => {});
+    throw err;
+  }
 }
 
 export async function unshareSite(slug: string, emit: Emit): Promise<void> {
@@ -460,11 +468,13 @@ export async function reconcile(emit: Emit): Promise<void> {
       emit(`adminer: pool fpm non avviato — ${(err as Error).message}`);
     }
   }
+  for (const slug of removeAllShareVhosts()) {
+    emit(`${slug}: vhost Live Link rimosso`);
+  }
   const reg = loadRegistry();
   let dirty = false;
   for (const site of reg.sites) {
     if (site.share) {
-      removeShareVhost(site.slug);
       site.share = null;
       dirty = true;
       emit(`${site.slug}: Live Link azzerato (i quick tunnel non sopravvivono al riavvio del daemon)`);

@@ -1,5 +1,6 @@
 // Registry siti (~/.wpdev/sites.json) — ispirato al sites.json di Local.
 import fs from 'node:fs';
+import net from 'node:net';
 import { REGISTRY_FILE } from './config.ts';
 import { readJson, writeJsonAtomic } from './util.ts';
 
@@ -60,9 +61,22 @@ export function removeSite(slug: string): void {
   saveRegistry(reg);
 }
 
-export function nextSharePort(base: number): number {
-  const used = new Set(loadRegistry().sites.map((s) => s.share?.port).filter(Boolean));
-  let port = base;
-  while (used.has(port)) port++;
-  return port;
+function portFree(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const srv = net.createServer();
+    srv.once('error', () => resolve(false));
+    srv.once('listening', () => srv.close(() => resolve(true)));
+    srv.listen(port, '127.0.0.1');
+  });
+}
+
+// Il registry non conosce i vhost scritti a mano: chi chiama passa in `reserved` le porte
+// già dichiarate nei frammenti caddy, e come rete di sicurezza si prova anche il bind.
+export async function nextSharePort(base: number, reserved: Set<number> = new Set()): Promise<number> {
+  const used = new Set(loadRegistry().sites.map((s) => s.share?.port).filter(Boolean) as number[]);
+  for (let port = base; port < base + 200; port++) {
+    if (used.has(port) || reserved.has(port)) continue;
+    if (await portFree(port)) return port;
+  }
+  throw new Error(`nessuna porta libera per il Live Link nel range ${base}-${base + 199}`);
 }
